@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Spielpass zum Ausdrucken</title>
+<style>
+:root{--tinte:#2C3E63;--leise:#6B7BA0;--himmel:#5B96E3;--gold:#E9B44C;--mint:#5FBFA0}
+*{box-sizing:border-box}
+body{
+  margin:0; padding:18px; font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+  color:var(--tinte);
+  background:linear-gradient(170deg,#A8CBF0,#B6C4F0,#C3BEEE,#CFB2E5,#D6ACE0);
+  background-attachment:fixed;
+}
+.leiste{
+  max-width:840px; margin:0 auto 14px; background:rgba(255,255,255,.88); border-radius:18px;
+  padding:14px 18px; box-shadow:0 6px 18px rgba(44,62,99,.14);
+}
+.leiste h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif; font-size:20px; margin:0 0 4px}
+.leiste p{margin:0 0 10px; font-size:13px; color:var(--leise)}
+.felder{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.felder label{font-size:12.5px; font-weight:600}
+.felder input{border:2px solid #dbe4f2; border-radius:16px; padding:7px 12px; font-size:13.5px; font-family:inherit}
+button{
+  border:none; border-radius:20px; padding:9px 18px; font-size:13.5px; font-weight:700; color:#fff;
+  background:var(--himmel); cursor:pointer; box-shadow:0 3px 10px rgba(63,122,203,.35); font-family:inherit;
+}
+.blatt{
+  max-width:840px; margin:0 auto; background:#fff; border-radius:14px; padding:16px;
+  display:grid; grid-template-columns:1fr 1fr; gap:12px;
+  box-shadow:0 10px 30px rgba(44,62,99,.18);
+}
+.pass{
+  border:2px dashed #b9c6de; border-radius:14px; padding:12px 14px; break-inside:avoid;
+}
+.pass h2{
+  font-family:"Iowan Old Style",Palatino,Georgia,serif; font-size:15px; margin:0 0 2px;
+}
+.pass .klasse{font-size:11px; color:var(--leise); margin-bottom:8px}
+.pass .name{
+  font-size:12px; font-weight:600; border-bottom:2px solid var(--himmel);
+  padding-bottom:14px; margin-bottom:9px;
+}
+table{width:100%; border-collapse:collapse; font-size:11.5px}
+th{
+  text-align:left; font-size:10px; text-transform:none; color:var(--leise);
+  border-bottom:2px solid #e3eaf7; padding:0 4px 3px;
+}
+td{border-bottom:1px solid #e3eaf7; height:23px; padding:0 4px}
+td.code{font-family:"Segoe UI Mono",Consolas,monospace; letter-spacing:2px; background:#FFFDF5}
+.hinweis{
+  margin-top:8px; font-size:9.5px; color:var(--leise); line-height:1.35;
+  border-left:3px solid var(--gold); padding-left:7px;
+}
+@media print{
+  body{background:#fff; padding:0}
+  .leiste{display:none}
+  .blatt{box-shadow:none; border-radius:0; max-width:none; padding:0; gap:8px}
+  .pass{border-color:#9aa3bc}
+  @page{size:A4; margin:12mm}
+}
+</style>
+</head>
+<body>
+
+<div class="leiste">
+  <h1>Spielpass zum Ausdrucken</h1>
+  <p>Trage Spiel und Klasse ein, drucke das Blatt und schneide die acht Pässe auseinander.
+     Jedes Kind schreibt am Stundenende seinen Code in die nächste freie Zeile.</p>
+  <div class="felder">
+    <label>Spiel: <input id="spiel" value="Das Lager am Feuer" size="24"></label>
+    <label>Klasse: <input id="klasse" value="Klasse 6a · GW · Frau Schmitt" size="26"></label>
+    <button onclick="window.print()">🖨️ Drucken</button>
+  </div>
+</div>
+
+<div class="blatt" id="blatt"></div>
+
+<script>
+function bauen(){
+  const spiel = document.getElementById("spiel").value;
+  const klasse = document.getElementById("klasse").value;
+  const zeilen = Array.from({length:6}, () => `<tr><td></td><td class="code"></td></tr>`).join("");
+  document.getElementById("blatt").innerHTML = Array.from({length:8}, () => `
+    <div class="pass">
+      <h2>🎮 ${spiel}</h2>
+      <div class="klasse">${klasse}</div>
+      <div class="name">Mein Name:</div>
+      <table>
+        <tr><th style="width:38%">Datum</th><th>Mein Code am Stundenende</th></tr>
+        ${zeilen}
+      </table>
+      <div class="hinweis">
+        Nächste Stunde: Spiel öffnen, den letzten Code eintippen, auf „Weiter“ klicken –
+        dann geht es genau dort weiter. Kein O und kein I, keine 0 und keine 1.
+      </div>
+    </div>`).join("");
+}
+document.getElementById("spiel").addEventListener("input", bauen);
+document.getElementById("klasse").addEventListener("input", bauen);
+bauen();
+</script>
+</body>
+</html>
