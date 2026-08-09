@@ -1,0 +1,2671 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reihenplaner · Krystina Schmitt</title>
+<style>
+:root{
+  /* Palette nach der HTML-Bibliothek von fraubaumgarten.de */
+  --himmel:#A8CBF0; --flieder:#C3BEEE; --mauve:#D6ACE0;
+  --tinte:#2C3E63; --tinte-hell:#44557E;
+  --blau:#5B96E3; --blau-dunkel:#3F7ACB; --blau-blass:#E8F0FC;
+  --lila:#5B96E3; --lila-dunkel:#2C3E63; --lila-hell:#8FA8E8; --lila-blass:#EDF1FB;
+  --teal:#5FBFA0; --gold:#E9B44C; --grau:#9AA3BC; --coral:#E08A7B;
+  --bg:transparent; --karte:rgba(255,255,255,.72); --karte-voll:#fff;
+  --linie:rgba(255,255,255,.9); --linie-fest:#DCE2F1;
+  --text:#2C3E63; --text-leise:#6B7BA0;
+  --fach:#5B96E3;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{min-height:100%;
+  background:linear-gradient(170deg,#A8CBF0 0%,#B6C4F0 28%,#C3BEEE 55%,#CFB2E5 78%,#D6ACE0 100%);
+  background-attachment:fixed;background-repeat:no-repeat}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Nunito,Quicksand,sans-serif;
+  color:var(--text);font-size:14px;line-height:1.55;min-height:100vh;background:transparent}
+.topbar{background:rgba(255,255,255,.55);color:var(--tinte);padding:16px 24px;display:flex;
+  align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.7)}
+.topbar h1{font-size:23px;font-weight:600;font-family:var(--serif);font-style:italic;letter-spacing:.2px}
+.topbar .sub{font-size:12.5px;color:var(--tinte-hell);opacity:.85;margin-top:1px}
+.badge{background:rgba(255,255,255,.72);padding:6px 14px;border-radius:20px;font-size:12.5px;
+  color:var(--tinte);border:1px solid rgba(255,255,255,.9)}
+nav.tabs{background:rgba(255,255,255,.42);display:flex;gap:6px;padding:10px 20px;
+  overflow-x:auto;backdrop-filter:blur(10px)}
+nav.tabs button{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.75);
+  padding:9px 17px;font-size:13.5px;color:var(--tinte-hell);cursor:pointer;border-radius:22px;
+  white-space:nowrap;font-family:inherit;transition:all .14s}
+nav.tabs button:hover{background:rgba(255,255,255,.82);color:var(--tinte)}
+nav.tabs button.aktiv{background:var(--blau);border-color:var(--blau);color:#fff;font-weight:500;
+  box-shadow:0 2px 10px rgba(91,150,227,.35)}
+main{max-width:1240px;margin:0 auto;padding:22px 18px 70px}
+.panel{display:none}.panel.aktiv{display:block}
+.karte{background:var(--karte);border:1px solid rgba(255,255,255,.85);border-radius:18px;
+  padding:22px 26px;margin-bottom:18px;backdrop-filter:blur(12px);
+  box-shadow:0 4px 24px rgba(44,62,99,.07)}
+.karte > h2{font-size:19px;font-weight:600;margin-bottom:4px;color:var(--tinte);
+  font-family:var(--serif);letter-spacing:.2px}
+.karte > .hinweis{font-size:12.5px;color:var(--text-leise);margin-bottom:16px;line-height:1.55}
+.gitter{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px}
+.feld{display:flex;flex-direction:column;gap:5px}
+.feld.breit{grid-column:1/-1}
+label{font-size:11.5px;font-weight:600;color:var(--text-leise);letter-spacing:.3px}
+label .opt{font-weight:400;opacity:.65}
+input[type=text],input[type=number],input[type=date],select,textarea{
+  font-family:inherit;font-size:13.5px;padding:9px 12px;border:1px solid var(--linie-fest);
+  border-radius:11px;background:rgba(255,255,255,.85);color:var(--text);width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blau);
+  background:#fff;box-shadow:0 0 0 3px var(--blau-blass)}
+select.offen{border-color:var(--gold);background:#FEFAF1}
+textarea{resize:vertical;min-height:58px;line-height:1.55}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:2px}
+.chipgruppe{font-size:11px;font-weight:600;color:var(--tinte-hell);width:100%;margin-top:8px;
+  letter-spacing:.3px}
+.chip{border:1px solid rgba(255,255,255,.9);background:rgba(255,255,255,.72);border-radius:20px;
+  padding:6px 14px;font-size:12.5px;cursor:pointer;user-select:none;transition:all .13s;
+  color:var(--tinte-hell)}
+.chip:hover{background:#fff;border-color:var(--blau);color:var(--tinte)}
+.chip.an{background:var(--blau);border-color:var(--blau);color:#fff;
+  box-shadow:0 2px 8px rgba(91,150,227,.3)}
+.knopf{background:var(--blau);color:#fff;border:none;border-radius:22px;padding:11px 22px;
+  font-size:13.5px;font-family:inherit;cursor:pointer;font-weight:500;transition:all .14s;
+  box-shadow:0 2px 10px rgba(91,150,227,.32)}
+.knopf:hover{background:var(--blau-dunkel);box-shadow:0 4px 14px rgba(91,150,227,.42)}
+.knopf.zweit{background:rgba(255,255,255,.8);color:var(--tinte);border:1px solid rgba(255,255,255,.95);
+  box-shadow:0 2px 8px rgba(44,62,99,.06)}
+.knopf.zweit:hover{background:#fff;border-color:var(--blau)}
+.knopf.gruen{background:var(--teal);box-shadow:0 2px 10px rgba(95,191,160,.32)}
+.knopf.gruen:hover{background:#48a88a}
+.knopf.klein{padding:6px 12px;font-size:12.5px}
+.knopfreihe{display:flex;gap:9px;flex-wrap:wrap;margin-top:6px;align-items:center}
+.warnung{border-left:3px solid var(--gold);background:rgba(255,250,240,.85);padding:12px 16px;
+  border-radius:0 12px 12px 0;font-size:13px;margin:10px 0;line-height:1.55}
+.warnung.rot{border-left-color:var(--coral);background:rgba(255,244,241,.9)}
+.warnung.gruen{border-left-color:var(--teal);background:rgba(240,251,247,.9)}
+.rechenbox{display:flex;flex-wrap:wrap;gap:24px;background:rgba(255,255,255,.62);
+  border:1px solid rgba(255,255,255,.9);border-radius:14px;padding:16px 20px;margin-top:14px}
+.rechenbox div{font-size:12.5px;color:var(--text-leise)}
+.rechenbox strong{display:block;font-size:23px;color:var(--tinte);font-weight:600;line-height:1.2;
+  font-family:var(--serif)}
+
+/* Stationskacheln */
+.kacheln{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px}
+.kachel{border:1px solid rgba(255,255,255,.9);border-top:3px solid var(--blau);border-radius:14px;
+  padding:14px 16px;background:rgba(255,255,255,.85);position:relative;
+  box-shadow:0 2px 12px rgba(44,62,99,.06)}
+.kachel h3{font-size:14.5px;font-weight:600;margin-bottom:3px;line-height:1.3;color:var(--tinte)}
+.kachel .thema{font-size:12px;color:var(--text-leise);margin-bottom:9px;line-height:1.4}
+.kachel .zeile{display:flex;justify-content:space-between;align-items:center;
+  font-size:11.5px;color:var(--text-leise);margin-top:5px}
+.kachel .zeit{font-weight:600;color:var(--text)}
+.wegmarke{display:inline-block;font-size:10px;font-weight:600;color:#fff;padding:2px 8px;
+  border-radius:5px;cursor:pointer;letter-spacing:.2px;user-select:none}
+.wegmarke:hover{filter:brightness(1.08)}
+.mischung{display:flex;height:22px;border-radius:8px;overflow:hidden;margin:10px 0 6px;
+  font-size:10.5px;font-weight:600;color:#fff}
+.mischung span{display:flex;align-items:center;justify-content:center;min-width:0}
+td.termin:empty:before{content:"–";color:var(--grau)}
+.kachel .fundzeile{margin-top:8px;padding-top:7px;border-top:1px dashed rgba(44,62,99,.16);
+  font-size:11px;color:var(--text-leise);display:flex;gap:7px;align-items:baseline}
+.kachel .fundzeile b{font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--blau-dunkel);flex:0 0 auto}
+.kachel .fundzeile span{flex:1;color:var(--text);min-height:15px}
+.kachel .fundzeile span.leer:empty:before{content:attr(data-platzhalter);color:var(--grau);font-style:italic}
+.marke{display:inline-block;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:5px}
+.marke.pflicht{background:var(--blau-blass);color:var(--blau-dunkel)}
+.marke.wahlpflicht{background:#E7F1F6;color:#25698a}
+.marke.wahl{background:#E8F5F0;color:#12805d}
+.marke.bonus{background:#FEF3E2;color:#a86a10}
+.kachel .werkzeug{position:absolute;top:8px;right:9px;display:flex;gap:2px}
+.kachel .werkzeug button{border:none;background:none;cursor:pointer;color:#b9b6ae;
+  font-size:13px;padding:1px 3px;border-radius:4px;line-height:1}
+.kachel .werkzeug button:hover{background:var(--blau-blass);color:var(--blau-dunkel)}
+.zugang{display:inline-block;width:17px;height:17px;line-height:17px;border-radius:5px;color:#fff;
+  font-size:10.5px;font-weight:700;text-align:center;margin-left:3px}
+.kachel [contenteditable]:focus{outline:2px solid var(--lila-hell);outline-offset:2px;border-radius:3px}
+
+/* Auslastung */
+.auslastung{height:26px;border-radius:13px;overflow:hidden;display:flex;background:rgba(255,255,255,.6);margin:12px 0 6px}
+.auslastung span{display:flex;align-items:center;justify-content:center;color:#fff;
+  font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden}
+
+/* Stundenleiste */
+table.raster{width:100%;border-collapse:collapse;font-size:12.5px}
+table.raster th{background:var(--tinte);color:#fff;font-weight:500;padding:10px 9px;
+  text-align:left;font-size:11.5px;letter-spacing:.2px}
+table.raster thead th:first-child{border-radius:11px 0 0 0}
+table.raster thead th:last-child{border-radius:0 11px 0 0}
+table.raster td{border-bottom:1px solid var(--linie-fest);padding:8px 9px;vertical-align:top}
+table.raster tr:hover td{background:rgba(232,240,252,.5)}
+table.raster td[contenteditable]:focus{outline:2px solid var(--lila-hell);outline-offset:-2px;background:#fff}
+tr.gemeinsam td{background:rgba(237,241,251,.75)}
+tr.gemeinsam:hover td{background:rgba(224,233,250,.85)}
+.nr{font-weight:600;color:var(--blau-dunkel);text-align:center;width:28px}
+.fokus{font-weight:600}
+.phasenpunkt{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.zeilenwerkzeug{display:flex;gap:3px}
+.zeilenwerkzeug button{border:none;background:none;cursor:pointer;font-size:13px;
+  color:var(--text-leise);padding:2px 4px;border-radius:4px;line-height:1}
+.zeilenwerkzeug button:hover{background:var(--blau-blass);color:var(--blau-dunkel)}
+
+.balken{display:flex;height:24px;border-radius:12px;overflow:hidden;margin:12px 0 8px}
+.balken span{display:flex;align-items:center;justify-content:center;color:#fff;
+  font-size:10.5px;font-weight:600;min-width:0;overflow:hidden;white-space:nowrap}
+.legende{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--text-leise)}
+.legende i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px}
+.aeiou-raster{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-top:12px}
+.aeiou-raster div{text-align:center;padding:11px 6px;border-radius:13px;
+  border:1px solid rgba(255,255,255,.9);background:rgba(255,255,255,.6);
+  font-size:11.5px;color:var(--text-leise)}
+.aeiou-raster div b{display:block;font-size:18px;color:var(--grau);margin-bottom:3px}
+.aeiou-raster div.da{background:rgba(255,249,238,.95);border-color:var(--gold)}
+.aeiou-raster div.da b{color:var(--gold)}
+.promptbox{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;
+  white-space:pre-wrap;background:rgba(255,255,255,.88);border:1px solid var(--linie-fest);
+  border-radius:14px;padding:18px;max-height:420px;overflow:auto;line-height:1.62;color:var(--tinte)}
+.liste{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.eintrag{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  border:1px solid rgba(255,255,255,.9);border-radius:13px;padding:11px 16px;
+  background:rgba(255,255,255,.8)}
+.eintrag b{font-size:13px;font-weight:600}
+.eintrag small{color:var(--text-leise);font-size:12px}
+.eintrag .weg{border:none;background:none;cursor:pointer;color:var(--text-leise);font-size:16px;padding:0 4px}
+.eintrag .weg:hover{color:var(--coral)}
+.fachpunkt{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--fach);margin-right:7px}
+.mini{font-size:11.5px;color:var(--text-leise);margin-top:5px;line-height:1.45}
+details.hilfe{margin-top:12px;font-size:12.5px;color:var(--text-leise)}
+details.hilfe summary{cursor:pointer;color:var(--blau-dunkel);font-weight:500}
+details.hilfe > div{padding:10px 0 0 2px;line-height:1.6}
+.quelle{font-size:11px;color:var(--text-leise);margin-top:8px;font-style:italic}
+.rahmenbox{background:rgba(255,250,240,.9);border:1px solid rgba(233,180,76,.35);
+  border-radius:14px;padding:14px 18px;font-size:13px;margin-bottom:16px;line-height:1.55}
+.rahmenbox b{color:#b07d1e}
+.druckkopf{display:none}
+@media print{
+  nav.tabs,.topbar,.knopfreihe,.zeilenwerkzeug,.kachel .werkzeug,.nurbildschirm{display:none!important}
+  html,body{background:#fff!important;font-size:10pt}
+  .karte{background:#fff!important;box-shadow:none;backdrop-filter:none}
+  main{max-width:none;padding:0}
+  .panel{display:none!important}
+  .panel.druckbar{display:block!important}
+  .karte{border:none;padding:0;margin-bottom:12px}
+  .karte > h2{margin-bottom:6px;font-size:12pt}
+  table.raster th{background:#2C3E63!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .marke,.kachel,tr.gemeinsam td,.auslastung,.auslastung span,.rahmenbox{
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  table.raster{font-size:8pt;table-layout:fixed;width:100%}
+  table.raster td,table.raster th{padding:4px 5px;word-wrap:break-word}
+  #raster th:nth-child(1),#raster td:nth-child(1){width:3.5%}
+  #raster th:nth-child(2),#raster td:nth-child(2){width:8%}
+  #raster th:nth-child(3),#raster td:nth-child(3){width:11%}
+  #raster th:nth-child(4),#raster td:nth-child(4){width:24%}
+  #raster th:nth-child(5),#raster td:nth-child(5){width:18%}
+  #raster th:nth-child(6),#raster td:nth-child(6){width:15%}
+  #raster th:nth-child(7),#raster td:nth-child(7){width:20.5%}
+  #karte-rahmen table.raster{table-layout:auto}
+  #karte-rahmen td{width:auto!important}
+  .kacheln{grid-template-columns:repeat(4,1fr);gap:8px}
+  .kachel{padding:8px 10px;break-inside:avoid}
+  .kachel h3{font-size:9.5pt}.kachel .thema{font-size:8pt}
+  tr{break-inside:avoid}
+  .druckkopf{display:block;margin-bottom:12px;border-bottom:2px solid #2C3E63;padding-bottom:7px}
+  .druckkopf h1{font-size:15pt;color:#2C3E63;font-family:var(--serif)}
+  .druckkopf p{font-size:9pt;color:#555}
+  @page{size:A4 landscape;margin:11mm}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>Reihenplaner</h1>
+    <div class="sub">Gemeinschaftsschule Saarland · offene Lernwelten · Klassen 5–10</div>
+  </div>
+  <div class="badge" id="topbadge">Neue Reihe</div>
+</div>
+
+<nav class="tabs">
+  <button class="aktiv" data-ziel="p-eingabe">1 · Eingabe</button>
+  <button data-ziel="p-plan">2 · Reihenplan</button>
+  <button data-ziel="p-claude">3 · Ausarbeitung mit Claude</button>
+  <button data-ziel="p-archiv">4 · Archiv</button>
+</nav>
+
+<main>
+
+<!-- ================= 1 EINGABE ================= -->
+<section class="panel aktiv" id="p-eingabe">
+
+  <div class="karte">
+    <h2>Basis</h2>
+    <div class="hinweis">Fach und Klassenstufe steuern Lehrplanauswahl, Kompetenzbereiche und Phasengewichtung.</div>
+    <div class="warnung gruen" style="margin-top:0;margin-bottom:16px">
+      Thema, Leitfrage oder Lernziel noch offen? Der Skill <b>thema-finden</b> macht aus Lehrplanstoff
+      ein Thema, das Neugier weckt – einfach in Claude danach fragen und das Ergebnis hier einsetzen.
+    </div>
+    <div class="gitter">
+      <div class="feld">
+        <label for="fach">Fach</label>
+        <select id="fach">
+          <option value="deutsch">Deutsch</option>
+          <option value="gw">Gesellschaftswissenschaften (Verbundfach)</option>
+          <option value="mathematik">Mathematik (Klassen 5–6)</option>
+          <option value="reli">Katholische Religion</option>
+          <option value="frei">anderes Fach</option>
+        </select>
+      </div>
+      <div class="feld" id="feld-schwerpunkt">
+        <label for="schwerpunkt">Schwerpunkt <span class="opt">– steuert die Phasengewichtung</span></label>
+        <select id="schwerpunkt"></select>
+      </div>
+      <div class="feld">
+        <label for="klasse">Klassenstufe</label>
+        <select id="klasse"></select>
+      </div>
+      <div class="feld">
+        <label for="lerngruppe">Lerngruppe <span class="opt">(z. B. 7c)</span></label>
+        <input type="text" id="lerngruppe" placeholder="7c">
+      </div>
+      <div class="feld breit">
+        <label for="thema">Thema der Reihe</label>
+        <input type="text" id="thema" placeholder="z. B. Die Antike – Wurzel unserer Kultur">
+      </div>
+      <div class="feld breit">
+        <label for="leitfrage">Leitfrage <span class="opt">– offen, lebensweltlich, provokativ</span></label>
+        <input type="text" id="leitfrage" placeholder="z. B. Was von den alten Griechen steckt heute noch in deinem Alltag?">
+      </div>
+      <div class="feld breit">
+        <label for="lernziel">Übergeordnetes Lernziel</label>
+        <textarea id="lernziel" placeholder="Die Schülerinnen und Schüler können …"></textarea>
+      </div>
+      <div class="feld">
+        <label for="stunden">Anzahl Unterrichtsstunden</label>
+        <input type="number" id="stunden" value="16" min="2" max="60">
+      </div>
+      <div class="feld breit">
+        <div class="warnung gruen" style="margin-top:0">
+          Eine Stunde dauert <b>70 Minuten</b>: 15 Minuten Impuls, 40 Minuten Arbeitsphase,
+          15 Minuten Reflexion. Das ist fest eingestellt – mehr musst du hier nicht angeben.
+        </div>
+      </div>
+    </div>
+    <div class="rechenbox" id="rechenbox"></div>
+    <div id="terminwarnung"></div>
+  </div>
+
+  <div class="karte">
+    <h2>Arbeitsform</h2>
+    <div class="hinweis">Die Stationen laufen parallel, die Kinder arbeiten im eigenen Tempo. Jede Stunde folgt dem Rhythmus Impuls → Arbeitsphase → Reflexion.</div>
+    <div class="gitter">
+      <div class="feld breit">
+        <label for="format">Lernumgebung</label>
+        <select id="format">
+          <option value="lerndorf" selected>Lerndorf – Häuser auf einer Lernlandkarte</option>
+          <option value="lernwelt">Lernwelt – Stationen auf einer Abenteuerkarte</option>
+          <option value="wochenplan">Wochenplan / Lernbüro – Pflicht-, Wahl- und Bonusaufgaben</option>
+          <option value="werkstatt">Werkstatt / Freiarbeit – Angebote zur freien Wahl</option>
+          <option value="lernpfad">Lernpfad – Etappen, aufeinander aufbauend</option>
+          <option value="projekt">Projekt – auf ein gemeinsames Produkt zulaufend</option>
+        </select>
+      </div>
+      <div class="feld breit">
+        <label for="reihenfolge">Reihenfolge der Stationen <span class="opt">– bewusst ohne Voreinstellung</span></label>
+        <select id="reihenfolge" class="offen">
+          <option value="">— bitte für diese Reihe festlegen —</option>
+          <option value="frei">frei – alle Stationen von Anfang an offen</option>
+          <option value="basis">Basis zuerst – eine Einstiegsstation verbindlich, danach frei</option>
+          <option value="chrono">chronologisch – aufeinander aufbauend, gestaffelte Freischaltung</option>
+        </select>
+      </div>
+      <div class="feld">
+        <label for="anzahl">Anzahl Stationen</label>
+        <select id="anzahl">
+          <option value="auto" selected>automatisch aus der Stundenzahl</option>
+          <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+          <option value="6">6</option><option value="7">7</option><option value="8">8</option>
+        </select>
+      </div>
+      <div class="feld">
+        <label for="bilanzdichte">Gemeinsame Zwischenbilanz</label>
+        <select id="bilanzdichte">
+          <option value="4">alle 4 Stunden</option>
+          <option value="5" selected>alle 5 Stunden</option>
+          <option value="7">alle 7 Stunden</option>
+          <option value="0">keine</option>
+        </select>
+      </div>
+      <div class="feld">
+        <label for="wahlanteil">Anteil Wahlangebote</label>
+        <select id="wahlanteil">
+          <option value="gering">gering – überwiegend Pflicht</option>
+          <option value="mittel" selected>mittel – Pflicht mit Wahlbereich</option>
+          <option value="hoch">hoch – weitgehend freie Wahl</option>
+        </select>
+      </div>
+      <div class="feld">
+        <label for="bonus">Bonus- und Profiangebot</label>
+        <select id="bonus"><option value="ja" selected>einplanen</option><option value="nein">nicht einplanen</option></select>
+      </div>
+      <div class="feld">
+        <label for="experten">Expertenrolle</label>
+        <select id="experten">
+          <option value="ja" selected>ja – wer fertig ist, berät an der Station</option>
+          <option value="nein">nein</option>
+        </select>
+      </div>
+    </div>
+    <div id="formathinweis"></div>
+  </div>
+
+  <div class="karte">
+    <h2>Narrativer Rahmen <span style="font-weight:400;font-size:12px;color:var(--text-leise)">– optional</span></h2>
+    <div class="hinweis">Eine Erzählfigur führt durch die Reihe und gibt den Stationen Namen. Leer lassen, wenn die Reihe ohne Rahmenhandlung auskommen soll.</div>
+    <div class="gitter">
+      <div class="feld">
+        <label for="rahmenfigur">Erzählfigur</label>
+        <input type="text" id="rahmenfigur" placeholder="z. B. Herakles">
+      </div>
+      <div class="feld breit">
+        <label for="rahmenhandlung">Rahmenhandlung</label>
+        <input type="text" id="rahmenhandlung" placeholder="z. B. Herakles führt durch Griechenland und braucht bei jeder Aufgabe Hilfe">
+      </div>
+      <div class="feld">
+        <label for="rahmenton">Ton</label>
+        <select id="rahmenton">
+          <option value="abenteuer">abenteuerlich</option>
+          <option value="detektiv">detektivisch, rätselhaft</option>
+          <option value="reise">Reise und Entdeckung</option>
+          <option value="auftrag">Auftrag / Mission</option>
+          <option value="alltag">nah am Alltag</option>
+        </select>
+      </div>
+      <div class="feld breit">
+        <label>Stationsnamen</label>
+        <div class="chips" id="rahmennamen">
+          <div class="chip an" data-w="ableiten">Namen aus dem Rahmen ableiten lassen</div>
+        </div>
+        <div class="mini">Der Planer vergibt zunächst sachliche Arbeitstitel. Die erzählerischen Namen setzt Claude bei der Ausarbeitung, weil sie zum Thema passen müssen.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="karte">
+    <h2>Lerngruppe &amp; Differenzierung</h2>
+    <div class="hinweis">Steuert Anzahl der Differenzierungsstufen, Sprachniveau und die Gewichtung der Übungsanteile.</div>
+    <div class="gitter">
+      <div class="feld">
+        <label for="groesse">Klassengröße</label>
+        <input type="number" id="groesse" value="24" min="1" max="40">
+      </div>
+      <div class="feld">
+        <label for="hetero">Heterogenität</label>
+        <select id="hetero">
+          <option value="gering">gering</option>
+          <option value="mittel">mittel</option>
+          <option value="hoch" selected>hoch</option>
+        </select>
+      </div>
+      <div class="feld">
+        <label for="lesen">Lesekompetenz</label>
+        <select id="lesen">
+          <option value="niedrig">niedrig (unter A2)</option>
+          <option value="mittel" selected>mittel (A2–B1)</option>
+          <option value="hoch">hoch (B1–B2)</option>
+        </select>
+      </div>
+      <div class="feld">
+        <label for="schreiben">Schreibkompetenz</label>
+        <select id="schreiben">
+          <option value="niedrig">niedrig</option>
+          <option value="mittel" selected>mittel</option>
+          <option value="hoch">hoch</option>
+        </select>
+      </div>
+      <div class="feld">
+        <label for="daz">Sprachschwache Lernende / DaZ</label>
+        <select id="daz">
+          <option value="viele">viele – A2 konsequent</option>
+          <option value="einige" selected>einige – A2/B1 gemischt</option>
+          <option value="kaum">kaum – B1 möglich</option>
+        </select>
+      </div>
+      <div class="feld">
+        <label for="niveau">Anspruchsebene <span class="opt">– nach Lehrplan</span></label>
+        <select id="niveau"></select>
+      </div>
+      <div class="feld breit">
+        <label for="foerder">Förderbedarfe / Besonderheiten <span class="opt">(optional)</span></label>
+        <input type="text" id="foerder" placeholder="z. B. 2× Förderbedarf Lernen, 3× Nachteilsausgleich Lesen">
+      </div>
+      <div class="feld breit">
+        <label>Form der Differenzierung</label>
+        <div class="chips" id="diffform">
+          <div class="chipgruppe">Aufgabe und Material</div>
+          <div class="chip an" data-w="Aufgabenniveau">nach Aufgabenniveau</div>
+          <div class="chip an" data-w="Tipp-Karten">3-stufige Tipp-Karten</div>
+          <div class="chip" data-w="Umfang">nach Umfang und Zeit</div>
+          <div class="chip" data-w="Material">nach Material (A2-Version)</div>
+          <div class="chip an" data-w="Medienformat">Medienformat wählbar (Text, Video, Podcast, Bild)</div>
+          <div class="chipgruppe">Sozialform und Beratung</div>
+          <div class="chip an" data-w="Sozialformwahl">Sozialform frei wählbar</div>
+          <div class="chip an" data-w="Besprechungstisch">Besprechungstisch (Peer-to-Peer)</div>
+          <div class="chip an" data-w="Beratertisch">Beratertisch (Lernbegleitung durch mich)</div>
+          <div class="chip an" data-w="Experten">Expertenrolle an der Fokusstation</div>
+          <div class="chipgruppe">Digital</div>
+          <div class="chip an" data-w="Lernbegleiter">KI-Lernbegleiter</div>
+          <div class="chip" data-w="Lernwelt">digitale Lernwelt mit Wissenssammlung</div>
+        </div>
+      </div>
+    </div>
+    <div id="diffhinweis"></div>
+  </div>
+
+  <div class="karte">
+    <h2>Lernbegleiter</h2>
+    <div class="hinweis">Chatbots, die in dieser Reihe eingesetzt werden. Jeder bekommt im Auftrag seinen Zuständigkeitsbereich mit.</div>
+    <div class="gitter">
+      <div class="feld"><label for="bot-name">Name</label><input type="text" id="bot-name" placeholder="z. B. Eldrin"></div>
+      <div class="feld"><label for="bot-rolle">Zuständig für</label><input type="text" id="bot-rolle" placeholder="z. B. Hilfestellung Stufe 1–2, Satzmuster"></div>
+      <div class="feld"><label for="bot-link">Link <span class="opt">(optional)</span></label><input type="text" id="bot-link" placeholder="https://…"></div>
+      <div class="feld" style="justify-content:flex-end"><button class="knopf zweit" id="btn-bot">Lernbegleiter hinzufügen</button></div>
+    </div>
+    <div class="liste" id="botliste"></div>
+  </div>
+
+  <div class="karte">
+    <h2>Lehrplan &amp; Kompetenzen</h2>
+    <div class="hinweis">Themenfelder und Kompetenzbereiche nach dem Lehrplan der Gemeinschaftsschule Saarland.</div>
+    <div class="gitter">
+      <div class="feld breit">
+        <label for="themenfeld">Themenfeld laut Lehrplan</label>
+        <select id="themenfeld"></select>
+      </div>
+      <div class="feld breit" id="feld-inhalte" style="display:none">
+        <label>Inhalte des Themenfelds <span class="opt">– wortgleich aus dem Lehrplan</span></label>
+        <div id="gwinhalte"></div>
+      </div>
+      <div class="feld breit">
+        <label>Kompetenzbereiche</label>
+        <div class="chips" id="kompetenzen"></div>
+        <div class="quelle" id="lehrplanquelle"></div>
+      </div>
+      <div class="feld breit">
+        <label>AEIOU – Differenzierung nach Kompetenzzugängen <span class="opt">– rein interne Planung</span></label>
+        <div class="warnung gruen" style="margin-top:0">
+          Fünf Zugänge zum <b>selben Lernziel</b>: <b>A</b> Analysieren · <b>E</b> Erforschen und Erkunden ·
+          <b>I</b> Imaginieren · <b>O</b> Ordnen · <b>U</b> Urteilen. Kein Schwerpunkt, sondern ein Prinzip:
+          Die Kinder erreichen das Ziel auf dem Weg, der ihnen liegt.
+        </div>
+        <select id="aeioumodus">
+          <option value="wahl" selected>Zugangswahl – jede Station bietet ALLE fünf Zugänge zur Auswahl</option>
+          <option value="aufteilung">Stationsaufteilung – fünf Stationen als A, E, I, O, U (Lerndorf-Prinzip)</option>
+          <option value="aus">kein AEIOU – Differenzierung läuft nur über die anderen Kanäle</option>
+        </select>
+        <div class="mini" id="aeiouhinweis"></div>
+      </div>
+      <div class="feld breit">
+        <label>Leitperspektiven</label>
+        <div class="chips" id="leitperspektiven"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="karte">
+    <h2>Materialquellen <span style="font-weight:400;font-size:12px;color:var(--text-leise)">– optional</span></h2>
+    <div class="hinweis">Lehrwerk, Arbeitsblätter, Dateien und Cloud-Ordner, auf die sich die Reihe stützt. Entscheidend ist die <b>Fundstelle</b> – erst sie macht aus einem Materialhinweis eine Zuordnung wie „Station 1 = Buch S. 13, Aufgabe 4a".</div>
+    <div class="warnung" style="margin-top:0">
+      Links zu OneDrive, SharePoint oder Google Drive kann Claude <b>nicht öffnen</b> – diese Ordner sind
+      nur mit deiner Anmeldung erreichbar. Der Link bleibt als Merkposten für dich stehen, ersetzt aber
+      keine Inhaltsangabe. Damit das Material wirklich einfließt, trage die Fundstelle ein
+      (Buch, Seite, Aufgabe · Arbeitsblatt, Nummer) oder hänge die Datei im Claude-Chat an.
+    </div>
+    <div class="gitter">
+      <div class="feld"><label for="mq-titel">Bezeichnung</label><input type="text" id="mq-titel" placeholder="z. B. Heimat und Welt 5/6"></div>
+      <div class="feld"><label for="mq-art">Art</label>
+        <select id="mq-art">
+          <option value="Arbeitsblatt">Arbeitsblatt</option>
+          <option value="Buchseite">Buch- oder Heftseite</option>
+          <option value="Text/Quelle">Text oder Quelle</option>
+          <option value="Bild/Karte">Bild, Karte, Grafik</option>
+          <option value="Video/Audio">Video oder Audio</option>
+          <option value="Wordwall">Wordwall-Aktivität</option>
+          <option value="Sonstiges">Sonstiges</option>
+        </select>
+      </div>
+      <div class="feld"><label for="mq-fund">Fundstelle <span class="opt">– Seite, Aufgabe, Blattnummer</span></label><input type="text" id="mq-fund" placeholder="z. B. S. 13, Aufg. 4a"></div>
+      <div class="feld"><label for="mq-zu">Gehört zu <span class="opt">– Nummer oder Name der Station</span></label><input type="text" id="mq-zu" placeholder="z. B. Station 2"></div>
+      <div class="feld"><label for="mq-link">Link <span class="opt">(optional)</span></label><input type="text" id="mq-link" placeholder="https://…"></div>
+      <div class="feld" style="justify-content:flex-end"><button class="knopf zweit" id="btn-mq">Quelle hinzufügen</button></div>
+      <div class="feld breit">
+        <button class="knopf zweit" id="btn-mqdatei">Dateien auswählen</button>
+        <input type="file" id="mqdatei" multiple style="display:none">
+        <div class="mini">Dateien werden mit Name und Größe vermerkt. Die Datei selbst bleibt auf deinem Rechner – für die Ausarbeitung hängst du sie im Claude-Chat an.</div>
+      </div>
+    </div>
+    <div class="liste" id="mqliste"></div>
+  </div>
+
+  <div class="karte">
+    <h2>Leistungsnachweise</h2>
+    <div class="hinweis">Großer Leistungsnachweis, kleine Leistungsnachweise und der handlungsorientierte Anteil nach Kopf, Herz und Hand.</div>
+
+    <div class="gitter">
+      <div class="feld breit"><label style="font-size:12.5px;color:var(--lila-dunkel)">Großer Leistungsnachweis (GLN)</label></div>
+      <div class="feld">
+        <label for="lnart">Art</label>
+        <select id="lnart">
+          <option value="schriftlich" selected>schriftlich – klassischer großer Leistungsnachweis</option>
+          <option value="alternativ">alternativ – Format zur Wahl</option>
+          <option value="keiner">kein GLN in dieser Reihe</option>
+        </select>
+      </div>
+      <div class="feld" id="feld-lnzeit">
+        <label for="lnzeitpunkt">Zeitpunkt</label>
+        <select id="lnzeitpunkt">
+          <option value="fest" selected>fester Termin für alle</option>
+          <option value="frei">frei innerhalb der Reihe, nach Absprache</option>
+        </select>
+      </div>
+      <div class="feld"><label for="lntermin">In welcher Stunde <span class="opt">(bei festem Zeitpunkt)</span></label><input type="number" id="lntermin" min="1" max="60" placeholder="z. B. 12"></div>
+      <div class="feld">
+        <label for="lnwahl">Formatwahl durch die Kinder</label>
+        <select id="lnwahl"><option value="ja" selected>ja – sie wählen aus den Formaten</option><option value="nein">nein – ein Format für alle</option></select>
+      </div>
+      <div class="feld breit" id="feld-lnformate">
+        <label>Angebotene Formate <span class="opt">– Mehrfachauswahl, eigene ergänzbar</span></label>
+        <div class="chips" id="lnformate">
+          <div class="chip" data-w="Klassenarbeit">Klassenarbeit</div>
+          <div class="chip" data-w="Podcast">Podcast</div>
+          <div class="chip" data-w="Erklärvideo">Erklärvideo</div>
+          <div class="chip" data-w="Modell / Objekt">Modell / Objekt</div>
+          <div class="chip" data-w="Ausstellung">Ausstellung</div>
+          <div class="chip" data-w="Portfolio">Portfolio</div>
+          <div class="chip" data-w="Präsentation">Präsentation</div>
+          <div class="chip" data-w="Interview / Reportage">Interview / Reportage</div>
+          <div class="chip" data-w="Plakat / Infografik">Plakat / Infografik</div>
+          <div class="chip" data-w="Rollenspiel / Szene">Rollenspiel / Szene</div>
+          <div class="chip" data-w="Schreibprodukt">Schreibprodukt</div>
+          <div class="chip" data-w="Lernwegeheft">Lernwegeheft</div>
+        </div>
+        <div class="knopfreihe"><button class="knopf zweit klein" id="btn-lnformat">+ eigenes Format</button></div>
+      </div>
+      <div class="feld"><label for="lnvorb">Vorbereitungsstunde</label>
+        <select id="lnvorb"><option value="ja" selected>einplanen</option><option value="nein">nicht einplanen</option></select></div>
+      <div class="feld"><label for="lnrueck">Rückmeldung &amp; Besprechung</label>
+        <select id="lnrueck"><option value="ja" selected>einplanen</option><option value="nein">nicht einplanen</option></select></div>
+    </div>
+
+    <div class="gitter" style="margin-top:18px">
+      <div class="feld breit"><label style="font-size:12.5px;color:var(--lila-dunkel)">Kleine Leistungsnachweise (KLN)</label></div>
+      <div class="feld">
+        <label for="klnanzahl">Anzahl in dieser Reihe</label>
+        <select id="klnanzahl">
+          <option value="0">keine</option><option value="1">1</option>
+          <option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
+        </select>
+      </div>
+      <div class="feld breit">
+        <label>Formate der kleinen Leistungsnachweise</label>
+        <div class="chips" id="klnformate">
+          <div class="chip an" data-w="Stationsergebnis">Stationsergebnis</div>
+          <div class="chip an" data-w="Lernwegeheft">Lernwegeheft / Lerntagebuch</div>
+          <div class="chip" data-w="Kurztest">Kurztest</div>
+          <div class="chip" data-w="Kurzpräsentation">Kurzpräsentation</div>
+          <div class="chip" data-w="Wortschatzcheck">Wortschatzcheck</div>
+          <div class="chip" data-w="Peer-Feedback">Peer-Feedback-Produkt</div>
+          <div class="chip an" data-w="Praktisches Produkt">Praktisches Produkt</div>
+          <div class="chip" data-w="Mündlicher Beitrag">Mündlicher Beitrag</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gitter" style="margin-top:18px">
+      <div class="feld breit"><label style="font-size:12.5px;color:var(--lila-dunkel)">Kopf, Herz und Hand</label></div>
+      <div class="feld">
+        <label for="hand">Handlungsorientierter Anteil</label>
+        <select id="hand">
+          <option value="ja" selected>verbindlich einplanen und bewerten</option>
+          <option value="angebot">als Angebot, nicht bewertet</option>
+          <option value="nein">nicht einplanen</option>
+        </select>
+      </div>
+      <div class="feld breit">
+        <label for="handwas">Was genau <span class="opt">(optional)</span></label>
+        <input type="text" id="handwas" placeholder="z. B. Modell einer griechischen Säule bauen, Experiment durchführen, Szene spielen">
+      </div>
+    </div>
+
+    <div class="gitter" style="margin-top:18px">
+      <div class="feld breit"><label style="font-size:12.5px;color:var(--lila-dunkel)">Kompetenzraster „Mein Wachstum"</label></div>
+      <div class="feld breit">
+        <label for="raster3">Drei bis fünf Kompetenzen für die Selbsteinschätzung <span class="opt">(optional – sonst leitet Claude sie aus dem Lernziel ab)</span></label>
+        <textarea id="raster3" placeholder="Eine Kompetenz pro Zeile, aus Schülersicht: „Ich kann …"></textarea>
+      </div>
+    </div>
+
+    <div class="gitter" style="margin-top:18px">
+      <div class="feld breit"><label style="font-size:12.5px;color:var(--lila-dunkel)">Material</label></div>
+      <div class="feld breit">
+        <label for="lehrwerk">Lehrwerk / Leitmaterial <span class="opt">(optional)</span></label>
+        <input type="text" id="lehrwerk" placeholder="z. B. Heimat und Welt GW 5/6, Westermann">
+      </div>
+      <div class="feld breit">
+        <label>Verfügbare Medien &amp; Formate</label>
+        <div class="chips" id="medien">
+          <div class="chip an" data-w="Smartboard">Smartboard</div>
+          <div class="chip" data-w="Tablets">Tablets / iPads</div>
+          <div class="chip an" data-w="OSS/Moodle">OSS / Moodle</div>
+          <div class="chip" data-w="Lernwelt">digitale Lernwelt</div>
+          <div class="chip" data-w="Escape Room">Escape Room</div>
+          <div class="chip" data-w="Lernspiel">Brett-/Kartenspiel</div>
+          <div class="chip" data-w="Film">Film / Video</div>
+          <div class="chip" data-w="Podcast">Podcast / Audio</div>
+          <div class="chip" data-w="Exkursion">Exkursion</div>
+          <div class="chip" data-w="Bibliothek">Schulbibliothek</div>
+          <div class="chip" data-w="Werkmaterial">Werk- und Bastelmaterial</div>
+        </div>
+      </div>
+      <div class="feld breit">
+        <label for="notizen">Weitere Hinweise <span class="opt">(optional)</span></label>
+        <textarea id="notizen" placeholder="z. B. Reihe soll auf die mündliche Prüfung vorbereiten"></textarea>
+      </div>
+    </div>
+
+    <div class="knopfreihe">
+      <button class="knopf" id="btn-generieren">Reihenplan erzeugen →</button>
+      <button class="knopf zweit" id="btn-beispiel">Mit Beispiel füllen</button>
+      <button class="knopf zweit" id="btn-leeren">Formular leeren</button>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="p-plan">
+  <div class="druckkopf">
+    <h1 id="druck-titel">Reihenplanung</h1>
+    <p id="druck-zeile"></p>
+  </div>
+
+  <div class="karte">
+    <h2>Stationen <span style="font-weight:400;font-size:12px;color:var(--text-leise)" id="stationsuntertitel"></span></h2>
+    <div class="hinweis nurbildschirm">Alle Stationen laufen parallel. Die Zeitangabe ist der Richtwert, den ein Kind für diese Station braucht. Namen, Themen und Zeiten sind direkt beschreibbar.</div>
+    <div id="rahmenanzeige"></div>
+    <div class="kacheln" id="kacheln"></div>
+    <div class="auslastung" id="auslastung"></div>
+    <div class="legende" id="auslastungslegende"></div>
+    <div id="zeitwarnung"></div>
+    <div class="knopfreihe nurbildschirm">
+      <button class="knopf zweit klein" id="btn-station">+ Station</button>
+    </div>
+  </div>
+
+  <div class="karte">
+    <h2>Stundenverlauf</h2>
+    <div class="hinweis nurbildschirm">Jede Stunde: Impuls mit einem Fokus, offene Arbeitsphase an allen Stationen, Reflexion. Gemeinsame Stunden sind hell hinterlegt.</div>
+    <div style="overflow-x:auto">
+      <table class="raster" id="raster"></table>
+    </div>
+    <div class="knopfreihe nurbildschirm">
+      <button class="knopf zweit klein" id="btn-stunde">+ Stunde</button>
+      <button class="knopf zweit klein" id="btn-neu">Plan neu berechnen</button>
+      <button class="knopf gruen klein" id="btn-drucken">Drucken / als PDF sichern</button>
+      <button class="knopf klein" id="btn-zu-claude">Weiter zur Ausarbeitung →</button>
+    </div>
+  </div>
+
+  <div class="karte nurbildschirm" id="karte-check">
+    <h2>Prüfblick</h2>
+    <div class="balken" id="balken"></div>
+    <div class="legende" id="legende"></div>
+    <div class="aeiou-raster" id="aeiou-raster"></div>
+    <div id="phasenhinweis"></div>
+    <div style="margin-top:16px;font-size:12.5px;font-weight:600;color:var(--lila-dunkel)">Analog, digital, handelnd &mdash; Mischung über die Reihe</div>
+    <div class="mischung" id="mischung"></div>
+    <div id="mischungshinweis"></div>
+  </div>
+
+  <div class="karte" id="karte-rahmen">
+    <h2>Rahmendaten</h2>
+    <div id="rahmen"></div>
+  </div>
+</section>
+
+<!-- ================= 4 CLAUDE ================= -->
+<section class="panel" id="p-claude">
+  <div class="karte">
+    <h2>Ausarbeitung mit Claude</h2>
+    <div class="hinweis">Der Auftrag enthält alle Eingaben, den Plan, die Materialzuordnung und die Vorgabe, kompakt zu bleiben.</div>
+    <div class="knopfreihe" style="margin-bottom:14px">
+      <button class="knopf" id="btn-kopieren">Auftrag kopieren</button>
+      <button class="knopf zweit" id="btn-prompt-neu">Auftrag neu erzeugen</button>
+      <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:400;color:var(--text-leise)">
+        <input type="checkbox" id="opt-lehrplan" style="width:auto"> Wörtliche Kompetenzformulierungen nötig
+      </label>
+      <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:400;color:var(--text-leise)">
+        <input type="checkbox" id="opt-material" style="width:auto"> Materialvorschläge für offene Stationen
+      </label>
+      <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:400;color:var(--text-leise)">
+        <input type="checkbox" id="opt-lernwelt" style="width:auto"> Lernwelt gleich mitbauen
+      </label>
+    </div>
+    <div class="promptbox" id="promptbox">Zuerst einen Reihenplan erzeugen.</div>
+    <details class="hilfe">
+      <summary>Wie der Rücklauf zurück in den Planer kommt</summary>
+      <div>Claude liefert die Reihenplanung als HTML-Datei mit Druckfunktion und zusätzlich die Übersicht als JSON.
+      Diese Datei liest du im Reiter <b>Archiv</b> über „Reihe importieren" wieder ein.</div>
+    </details>
+  </div>
+</section>
+
+<!-- ================= 5 ARCHIV ================= -->
+<section class="panel" id="p-archiv">
+  <div class="karte">
+    <h2>Reihen-Archiv</h2>
+    <div class="hinweis">Reihen werden als JSON-Dateien gesichert – keine Speicherung im Browser, keine Schülerdaten.</div>
+    <div class="knopfreihe">
+      <button class="knopf" id="btn-speichern">Aktuelle Reihe sichern (.json)</button>
+      <button class="knopf zweit" id="btn-importieren">Reihe importieren</button>
+      <input type="file" id="datei" accept=".json" style="display:none">
+    </div>
+    <div style="margin-top:18px">
+      <div class="hinweis" style="margin-bottom:9px">In dieser Sitzung geöffnete Reihen:</div>
+      <div class="liste" id="archivliste"><div class="mini">Noch keine Reihe gesichert.</div></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* AEIOU – Prinzip der Differenzierung nach Kompetenzzugängen.
+   Kein Schwerpunkt, sondern fünf Wege zum SELBEN Lernziel.
+   A steht für Analysieren, nicht für Argumentieren. */
+const AEIOU = {
+  A:{name:"Analysieren", kurz:"genau hinsehen, zerlegen, Bauart erkennen", farbe:"#D98BA0"},
+  E:{name:"Erforschen / Erkunden", kurz:"herausfinden, recherchieren, ausprobieren", farbe:"#5B96E3"},
+  I:{name:"Imaginieren", kurz:"sich hineinversetzen, entwerfen, erfinden", farbe:"#B98BD9"},
+  O:{name:"Ordnen", kurz:"sortieren, vergleichen, strukturieren", farbe:"#5FBFA0"},
+  U:{name:"Urteilen", kurz:"bewerten, Stellung nehmen, abwägen", farbe:"#E9B44C"}
+};
+const AEIOU_REIHE = ["A","E","I","O","U"];
+
+/* Ist AEIOU angewählt, steht in JEDER Station jeder der fünf Zugänge zur Wahl.
+   Kein Vorfiltern nach Phase: sonst bliebe einzelnen Kindern ihr Weg verschlossen.
+   Der Eintrag hier gibt nur an, welcher Zugang in der jeweiligen Phase am nächsten
+   liegt – er wird im Auftrag als naheliegender Einstieg genannt, schließt aber
+   keinen anderen aus. */
+const ZUGANG_NAHELIEGEND = {
+  orientieren:"E", erarbeiten1:"E", erarbeiten2:"A",
+  ueben:"O", transfer:"I", bilanz:"U", ln:"U"
+};
+
+/* Stationsnamen, wenn AEIOU die Stationen aufteilt (Lerndorf-Prinzip).
+   Bewusst motivierend und schülerorientiert – nie „Analysehaus" oder „Urteilshaus".
+   Je Klassenstufengruppe ein eigener Satz. */
+const ZUGANGSSTATIONEN = {
+  "5-6":{
+    A:["Detektivbüro","genau hinsehen – was fällt dir auf?"],
+    E:["Forscherlabor","selbst herausfinden und ausprobieren"],
+    I:["Kreativwerkstatt","dir etwas ausdenken und gestalten"],
+    O:["Sortierwerkstatt","Ordnung ins Durcheinander bringen"],
+    U:["Haus der Entscheidungen","was hältst du davon – und warum?"]
+  },
+  "7-8":{
+    A:["Spurensuche","genau hinsehen und Belege finden"],
+    E:["Entdeckerlabor","selbst herausfinden und ausprobieren"],
+    I:["Ideenschmiede","dir etwas ausdenken und gestalten"],
+    O:["Ordnungsbüro","sortieren, vergleichen, Überblick schaffen"],
+    U:["Haus der Entscheidungen","Stellung nehmen und begründen"]
+  },
+  "9-10":{
+    A:["Recherchebüro","genau hinsehen und Belege prüfen"],
+    E:["Forschungsstation","selbst herausfinden und überprüfen"],
+    I:["Denkfabrik","entwerfen, weiterdenken, gestalten"],
+    O:["Schaltzentrale","strukturieren und den Überblick behalten"],
+    U:["Debattenraum","Stellung nehmen und begründen"]
+  }
+};
+function zugangsNamen(klasse){
+  const k = parseInt(klasse,10);
+  return k <= 6 ? ZUGANGSSTATIONEN["5-6"] : k <= 8 ? ZUGANGSSTATIONEN["7-8"] : ZUGANGSSTATIONEN["9-10"];
+}
+
+/* Aufgabentypen innerhalb einer Station (Krystinas Häuser-Systematik) */
+const AUFGABENTYPEN = "Input · Basisaufgabe · Blütenaufgabe · Digitalaufgabe";
+
+/* Phasenmodell */
+const PHASEN = [
+  {id:"orientieren", name:"Ankommen & Orientieren", kurz:"Orientieren", farbe:"#E9B44C"},
+  {id:"erarbeiten1", name:"Erarbeiten I – Grundlagen", kurz:"Erarbeiten I", farbe:"#8FA8E8"},
+  {id:"erarbeiten2", name:"Erarbeiten II – Vertiefen", kurz:"Erarbeiten II", farbe:"#6E7FD4"},
+  {id:"ueben", name:"Üben & Sichern", kurz:"Üben", farbe:"#5FBFA0"},
+  {id:"transfer", name:"Transfer & Anwenden", kurz:"Transfer", farbe:"#5B96E3"},
+  {id:"bilanz", name:"Bilanzieren & Reflektieren", kurz:"Bilanz", farbe:"#B98BD9"},
+  {id:"ln", name:"Leistungsnachweis", kurz:"Leistungsnachweis", farbe:"#9AA3BC"}
+];
+
+/* Fächer und Schwerpunkte */
+const FAECHER = {
+  deutsch:{
+    name:"Deutsch", klassen:[5,6,7,8,9,10], farbe:"#D98BA0", blass:"#FBEFF3",
+    schwerpunkte:[
+      {w:"literatur", t:"Literatur & Textrezeption"},
+      {w:"schreiben", t:"Schreiben & Textproduktion"},
+      {w:"sprache",   t:"Sprache & Sprachgebrauch"},
+      {w:"medien",    t:"Medien & Sachtexte"}
+    ]
+  },
+  gw:{
+    name:"Gesellschaftswissenschaften", klassen:[5,6,7,8,9,10], farbe:"#6FBF9A", blass:"#EDF9F4",
+    schwerpunkte:[
+      {w:"integriert",  t:"integriert – alle drei Perspektiven"},
+      {w:"geschichte",  t:"historische Perspektive im Vordergrund"},
+      {w:"geographie",  t:"geographische Perspektive im Vordergrund"},
+      {w:"politik",     t:"politisch-gesellschaftliche Perspektive im Vordergrund"}
+    ]
+  },
+  mathematik:{
+    name:"Mathematik", klassen:[5,6], farbe:"#5B96E3", blass:"#E8F0FC",
+    schwerpunkte:[{w:"standard", t:"Regelunterricht"}]
+  },
+  reli:{
+    name:"Katholische Religion", klassen:[5,6,7,8,9,10], farbe:"#E9B44C", blass:"#FDF4E3",
+    schwerpunkte:[
+      {w:"integriert",   t:"integriert – Lernbereich vollständig"},
+      {w:"biblisch",     t:"biblisch-textbezogen"},
+      {w:"ethisch",      t:"ethisch-dialogisch"},
+      {w:"interreligioes", t:"interreligiös / religionskundlich"}
+    ]
+  },
+  frei:{
+    name:"anderes Fach", klassen:[5,6,7,8,9,10], farbe:"#8B8FD9", blass:"#EFEFFB",
+    schwerpunkte:[{w:"standard", t:"Regelunterricht"}]
+  }
+};
+
+/* Verteilungsschlüssel je Fach + Schwerpunkt */
+const PROFILE = {
+  "deutsch:literatur": {orientieren:.15, erarbeiten1:.22, erarbeiten2:.25, ueben:.13, transfer:.17, bilanz:.08},
+  "deutsch:schreiben": {orientieren:.12, erarbeiten1:.20, erarbeiten2:.15, ueben:.28, transfer:.17, bilanz:.08},
+  "deutsch:sprache":   {orientieren:.12, erarbeiten1:.25, erarbeiten2:.14, ueben:.34, transfer:.07, bilanz:.08},
+  "deutsch:medien":    {orientieren:.16, erarbeiten1:.22, erarbeiten2:.20, ueben:.12, transfer:.22, bilanz:.08},
+  "gw:integriert":     {orientieren:.16, erarbeiten1:.25, erarbeiten2:.21, ueben:.10, transfer:.20, bilanz:.08},
+  "gw:geschichte":     {orientieren:.15, erarbeiten1:.28, erarbeiten2:.22, ueben:.09, transfer:.18, bilanz:.08},
+  "gw:geographie":     {orientieren:.15, erarbeiten1:.25, erarbeiten2:.20, ueben:.12, transfer:.20, bilanz:.08},
+  "gw:politik":        {orientieren:.18, erarbeiten1:.22, erarbeiten2:.20, ueben:.10, transfer:.22, bilanz:.08},
+  "mathematik:standard":{orientieren:.10, erarbeiten1:.25, erarbeiten2:.14, ueben:.36, transfer:.07, bilanz:.08},
+  "reli:integriert":     {orientieren:.18, erarbeiten1:.24, erarbeiten2:.22, ueben:.06, transfer:.20, bilanz:.10},
+  "reli:biblisch":       {orientieren:.16, erarbeiten1:.28, erarbeiten2:.24, ueben:.06, transfer:.16, bilanz:.10},
+  "reli:ethisch":        {orientieren:.18, erarbeiten1:.20, erarbeiten2:.20, ueben:.05, transfer:.27, bilanz:.10},
+  "reli:interreligioes": {orientieren:.18, erarbeiten1:.26, erarbeiten2:.20, ueben:.06, transfer:.20, bilanz:.10},
+  "frei:standard":     {orientieren:.15, erarbeiten1:.25, erarbeiten2:.20, ueben:.17, transfer:.15, bilanz:.08}
+};
+
+/* Lehrplan Saarland – aus den Original-PDFs des Bildungsservers ausgewertet.
+   GW: Themenfelder mit den Stundenrichtwerten des Lehrplans.
+   Deutsch: Der Kernlehrplan gibt KEINE Themenfelder vor – die Fachkonferenz legt
+   Inhalte und Unterrichtseinheiten fest. Die Liste ist daher ein Vorschlag, kein Lehrplaninhalt.
+   Mathematik: Das vorliegende Dokument regelt nur die allgemeinen Kompetenzen. */
+const LEHRPLAN = {
+  deutsch:{
+    5:["Märchen","Fabeln und Sagen","Erzählen und Erzähltexte","Beschreiben","Rechtschreibung: Grundlagen","Wortarten und Satzglieder","Lesen und Vorlesen","Jugendbuch / Ganzschrift"],
+    6:["Kurzgeschichten und kurze Erzähltexte","Jugendbuch / Ganzschrift","Berichten","Beschreiben und Vorgangsbeschreibung","Satzlehre und Zeichensetzung","Gedichte","Sachtexte erschließen","Medien im Alltag"],
+    7:["Balladen","Jugendbuch / Ganzschrift","Zeitung und journalistische Textsorten","Argumentieren – Einführung","Zeichensetzung und Satzgefüge","Beschreiben und Erklären","Sachtexte und Grafiken","Rechtschreibstrategien"],
+    8:["Kurzgeschichte","Erörterung – Einführung","Medientexte und Werbung","Lyrik","Satzgefüge und Konjunktiv","Inhaltsangabe","Drama – Einführung","Sprachvarietäten"],
+    9:["Novelle oder Roman","Gedichte und Lyrikvergleich","Erörterung","Bewerbung und Lebenslauf","Drama","Sachtextanalyse","Rhetorik und Sprache der Politik","Medienkritik"],
+    10:["Literarische Texte interpretieren","Drama / Ganzschrift","Erörterung komplex","Gedichtinterpretation","Sprache und Wirklichkeit","Prüfungsformate und Textsorten","Kurzprosa der Gegenwart","Materialgestütztes Schreiben"]
+  },
+  gw:{
+    5:["5.1 Unsere neue Schule (12 Std)","5.2 Kinder der Welt (12 Std)","5.3 Erde – Klima – Mensch (16 Std)"],
+    6:["6.1 Tourismus – zuhause und unterwegs (16 Std)","6.2 Ägypten – ein Geschenk des Nils (16 Std)","6.3 Die Antike – Wurzel unserer Kultur (18 Std)"],
+    7:["7.1 Wirtschaft, Gesellschaft und Kultur im Mittelalter (18 Std)","7.2 Umgang mit Katastrophen und Konflikten (18 Std)","7.3 Umbrüche und Aufbruch (24 Std)"],
+    8:["8.1 Industrialisierung und ihre Folgen (20 Std)","8.2 Klima und Klimawandel (22 Std)","8.3 Imperialismus und Entwicklungspolitik (28 Std)"],
+    9:["9.1 Demokratie und Diktatur im 20. Jahrhundert (20 Std)","9.2 Die zwei deutschen Staaten (16 Std)","9.3 Die europäische Einigung (24 Std)"],
+    10:["10.1 Globalisierung und Tragfähigkeit der Erde (24 Std)","10.2 Friedenssicherung (16 Std)","10.3 Medien und Politik (18 Std)"]
+  },
+  mathematik:{
+    5:["Daten und Zufall","Natürliche Zahlen (ganzjährig)","Brüche und negative Zahlen","Größen","Geometrie","Muster und Strukturen (ganzjährig)"],
+    6:["Daten und Zufall","Natürliche Zahlen (ganzjährig)","Brüche und negative Zahlen","Größen","Geometrie","Muster und Strukturen (ganzjährig)"]
+  },
+  reli:{
+    5:["Mensch 5/6","Gott 5/6","Bibel 5/6","Jesus Christus 5/6","Kirche 5/6","Religionen 5/6","Ethik 5/6"],
+    6:["Mensch 5/6","Gott 5/6","Bibel 5/6","Jesus Christus 5/6","Kirche 5/6","Religionen 5/6","Ethik 5/6"],
+    7:["Mensch 7/8","Gott 7/8","Bibel 7/8","Jesus Christus 7/8","Kirche 7/8","Religionen 7/8","Ethik 7/8"],
+    8:["Mensch 7/8","Gott 7/8","Bibel 7/8","Jesus Christus 7/8","Kirche 7/8","Religionen 7/8","Ethik 7/8"],
+    9:["Mensch 9/10","Gott 9/10","Bibel 9/10","Jesus Christus 9/10","Kirche 9/10","Religionen 9/10","Ethik 9/10"],
+    10:["Mensch 9/10","Gott 9/10","Bibel 9/10","Jesus Christus 9/10","Kirche 9/10","Religionen 9/10","Ethik 9/10"]
+  },
+  frei:{5:[],6:[],7:[],8:[],9:[],10:[]}
+};
+
+/* Unterthemen der GW-Themenfelder – wortgleich aus dem Lehrplan */
+const GW_INHALTE = {
+  "5.1":["Schulstandort","Leben in der neuen Schulgemeinschaft","Schule – früher und heute"],
+  "5.2":["Lebenswelten der Kinder verschiedener Kontinente","Lebenswelten der Kinder verschiedener Zeiten","Kinder haben Rechte"],
+  "5.3":["Die Erde – ein Himmelskörper","Die Bewegung der Erde","Wetter und Klima","Auf den Spuren der Menschen"],
+  "6.1":["Die Gemeinde","Spuren der Vergangenheit in unserer Gemeinde","Reisewege und Urlaubsziele"],
+  "6.2":["Naturräumliche Ausstattung","Entstehung einer frühen Hochkultur","Ökologische Probleme im modernen Ägypten"],
+  "6.3":["Griechenland – die Wiege Europas","Rom erobert die Welt","Römer und Kelten"],
+  "7.1":["Mittelalterliches Weltbild","Adliges Leben","Leben auf dem Land","Leben in der Stadt"],
+  "7.2":["Krankheiten und Hunger – früher und heute","Naturkatastrophen – früher und heute","Möglichkeiten der Krisenbewältigung"],
+  "7.3":["Weltbilder im Wandel","Weltordnung im Wandel","Die Französische Revolution","Restauration und Revolution in Deutschland"],
+  "8.1":["Industrielle Revolution","Industrialisierung und Umwelt","Von der sozialen Frage zur sozialen Marktwirtschaft","Industrieland Deutschland","Arbeit und Berufswelt"],
+  "8.2":["Grundlagen des Klimas","Vegetationszonen der Erde und ihre wirtschaftliche Nutzung","Klimaveränderung"],
+  "8.3":["Gründung des Deutschen Reiches","Vom Kolonialismus zum Imperialismus","Erster Weltkrieg","Entwicklungszusammenarbeit"],
+  "9.1":["Weimarer Republik","NS-Herrschaft","Rassismus, Recht und Demokratie heute"],
+  "9.2":["Ost-West-Konflikt","Bundesrepublik Deutschland und DDR im Vergleich","Wirtschaftsräume im Wandel"],
+  "9.3":["Der Prozess der europäischen Einigung","Europäischer Wirtschaftsraum","Das Saarland in der Großregion"],
+  "10.1":["Natur- und Kulturraum China","Globalisierung und Ökonomie","Globalisierung und Ökologie"],
+  "10.2":["Länderprofile der Weltmächte USA und Russland","Die Welt nach 1945","Friedenssicherung als internationale Aufgabe"],
+  "10.3":["Herrschaftsdarstellung in der Geschichte","Wirkung der Massenmedien","Umgang mit Medien"]
+};
+
+/* Unterthemen der Mathematik-Themenfelder – wortgleich aus dem Lehrplan 2025 */
+const MATHE_INHALTE = {
+  "Daten und Zufall":["— keine Unterthemen im Lehrplan ausgewiesen"],
+  "Natürliche Zahlen (ganzjährig)":["Natürliche Zahlen und ihre Darstellungen","Grundrechenarten","Teiler und Vielfache"],
+  "Brüche und negative Zahlen":["Grundvorstellungen von Brüchen","Operieren mit Brüchen","Negative Zahlen, ganze Zahlen"],
+  "Größen":["Größenvorstellungen und Messen","Mit Größen rechnen und modellieren"],
+  "Geometrie":["Geometrische Objekte","Messen","Symmetrie"],
+  "Muster und Strukturen (ganzjährig)":["Folgen und Muster","Terme und Operationen"]
+};
+
+/* Lernbereiche Katholische Religion – Zielsatz, Inhalte und Basisbegriffe
+   wortnah aus dem Lehrplan Katholische Religion, GemS Saarland 2025.
+   Der Lehrplan weist KEINE Stundenrichtwerte je Lernbereich aus. */
+const RELI_INHALTE = {
+  "Mensch 5/6":["ZIEL: Einzigartigkeit und Ich-Stärke in der Gemeinschaft vor dem Hintergrund der christlichen Botschaft","Selbst- und Fremddarstellung analog und digital (Social Media)","Meinungen und Gefühle analog und digital (Likes, Hatespeech)","Stärken und Schwächen anderer, (Cyber-)Mobbing","Klassengemeinschaft, Vereine, Kirchengemeinschaft, digitale Gemeinschaftsaktionen","Mutmachtexte aus der Bibel, Local heroes","BASISBEGRIFFE: Einzigartigkeit, Selbstvertrauen, Gemeinschaft"],
+  "Gott 5/6":["ZIEL: christliches Gottesverständnis erweitern; Gebet, Ritual und Liturgie als Ausdrucksformen wahrnehmen","Gotteserfahrung: Naturerfahrung, Gemeinschaft, Gebete, Gottesdienste, Pilgern","biblische Gottesmetaphern (Feuer, Wolke, Hirt, Burg, König, Richter, Vater und Mutter)","Ex 3,1-13 · Bilderverbot Ex 20,4-5a · Lk 15,11-32","Gebet als Dank, Freude, Bitte, Trost und Klage; Vaterunser Mt 6,9-13","BASISBEGRIFFE: Gottesbilder, Gleichnis, Gebet, Vaterunser"],
+  "Bibel 5/6":["ZIEL: Freude am Entdecken der Bibel; Orientierung durch biblische Erzählungen","Aufbau, Entstehung, Textsorten, Zitierweise, Textstellen finden","Altes und Neues Testament, Tanach, Sammlung von Glaubenserfahrungen","Gen 12,1-20 · Gen 13,1-13 · 1 Sam 17 · 2 Sam 12,1-25 · Jona 3,1-10","Bilder, Symbole, Metaphern; Gleichnis; Gebet","BASISBEGRIFFE: Bibel, Heilige Schrift, Testament, Evangelium, Gleichnis"],
+  "Jesus Christus 5/6":["ZIEL: auf Jesu Botschaft vertrauen und sich zur Nachfolge herausfordern lassen","Lebenslauf Jesu, das Land, religiöse Gruppen, politische Lage, Alltag","Jesu Begegnung mit Jüngern, Außenseitern, Frauen, Kindern","Reich Gottes in Wort (Gleichnisse, Vaterunser) und Tat (Mahlgemeinschaft, Krankenheilung)","Nachfolge Jesu heute","BASISBEGRIFFE: Israel, See Genezareth, Jerusalem, Kreuz, Reich Gottes, Nächstenliebe"],
+  "Kirche 5/6":["ZIEL: Kirchengemeinde als Ort der Begegnung entdecken und sich engagieren","Orte gelebten Glaubens, Aufgaben und Menschen in der Kirche","christliche Symbole und Sakramente, Feste und Bräuche im Kirchenjahr","evangelisch und katholisch im Vergleich: Kirchenraum, Glaubensvollzug, Ämter","Paulus: Leben, Missionsreisen, Briefe","BASISBEGRIFFE: Kirche, Priester, Bischof, Papst, Gottesdienst, Advent, Weihnachten, Fastenzeit"],
+  "Religionen 5/6":["ZIEL: andere religiöse Überzeugungen respektvoll wahrnehmen und in Dialog treten","monotheistische Religionen und ihre Verbreitung; Religionen Asiens","Judentum: Tora, Synagoge, Sabbat, Bar-Mizwa, Pessach, Sukkot, Chanukka","Islam: Mohammed, Koran, Moschee, fünf Säulen, Zuckerfest, Opferfest","Erinnerungskultur: Stolpersteine, jüdische Friedhöfe, Gedenktage","BASISBEGRIFFE: Monotheismus, Judentum, Tora, Synagoge, Sabbat, Islam, Koran, Moschee"],
+  "Ethik 5/6":["ZIEL: Gespür für die Situation anderer; verantwortungsbewusster Umgang mit sich, anderen und der Umwelt","Konfliktsituationen und Regeln in Familie, Schule, Freundeskreis, Verein","Dekalog, Liebesgebot, Goldene Regel","Menschenwürde, Solidarität, Gerechtigkeit, Toleranz, Verantwortung","Bewahrung der Schöpfung, Natur- und Tierschutz, Menschenrechte, Schulprojekte","BASISBEGRIFFE: Dekalog, Goldene Regel, Menschenwürde, Nächstenliebe, Schöpfung"],
+
+  "Mensch 7/8":["ZIEL: eigene Bedürfnisse, Möglichkeiten und Grenzen wahrnehmen, Verantwortung übernehmen","Fähigkeiten, Werte, Wünsche und Sehnsüchte von Heranwachsenden","verantwortlicher Umgang mit sich selbst und anderen; Grenzen der eigenen Freiheit","christliches Menschenbild: Freiheit, Gleichwertigkeit, unbedingtes Angenommensein","Werte in Beziehungen: Vertrauen, Zuverlässigkeit, Toleranz; Umgang mit Konflikten","Freundschaft, Liebe und Sexualität; Darstellung in Medien"],
+  "Gott 7/8":["ZIEL: Relevanz des christlichen Gottesverständnisses bedenken","Gottesvorstellungen im Alltag (Popkultur, Rituale im Sport)","existenzielle Erfahrungen und Sinnfragen als Verstehenshorizont","Ex 3,1-13 · Ex 20,4-5a · Gottesmetaphern und Gottessymbole","Gott als Schöpfer, Gott der Befreiung und Gerechtigkeit, der dreieine Gott","Gottesbild Jesu (Lk 15,11-32)"],
+  "Bibel 7/8":["ZIEL: Bibel als Quelle christlicher Lebensdeutung und Denkanstoß","Exodus: Abhängigkeit und Freiheit, Mose, Auszug und Flucht, Suche nach Orientierung","Entstehung der Evangelien, redaktionelle Arbeit, Zwei-Quellen-Theorie, synoptischer Vergleich","Deutungswege: psychologisch, metaphorisch, historisch-kritisch","Sprachformen: Gleichnis, Wundererzählung, Mythos","Schöpfungserzählungen und naturwissenschaftliche Erklärungsmodelle"],
+  "Jesus Christus 7/8":["ZIEL: Auferstehungsbotschaft als Hoffnungsperspektive überdenken","Ostererzählungen: das leere Grab, Begegnungserzählungen","Auferstehung als neues Leben von Gott her","christologische Hoheitstitel: Messias/Christus, Sohn Gottes, Herr","Nachfolge; Jünger, Heilige, Franz von Assisi, Martin Luther King, Mutter Teresa, local heroes","BASISBEGRIFFE: Auferstehung, Ostern, Messias/Christus, Nachfolge, Heilige"],
+  "Kirche 7/8":["ZIEL: Vielfalt des Christseins entdecken; persönliches Bekenntnis","Reformation: Situation vor der Reformation, Luther, sola scriptura, Rechtfertigungslehre","Folgen der Trennung; reformatorische und römisch-katholische Kirche im Vergleich","weitere Konfession: orthodoxe oder anglikanische Kirche","Ökumene: Sozialstation, Jugendkreuzweg, Taizé, Friedensgebet","Kirche als Volk Gottes; eigene Erfahrungen mit Kirche"],
+  "Religionen 7/8":["ZIEL: neue Perspektiven im Dialog mit anderen religiösen Traditionen","Abraham/Ibrahim als Stammvater für Juden, Christen und Muslime","Verwurzelung des Christentums im Judentum: Feste, Heilige Schriften, Gebet, Speisegebote","Christentum und Islam: Moschee und Kirche, Koran und Bibel, Ramadan, halal","religiöse Vorurteile, Fremd- und Selbstwahrnehmung","Sekte, Okkultismus, Satanismus, Esoterik"],
+  "Ethik 7/8":["ZIEL: Grenzen wahrnehmen und die christliche Botschaft als Möglichkeit erfahren, sie zu bestehen","konstruktiver Umgang mit Konflikten, analog und digital; Deeskalation","Schuld und Vergebung; Beichte als Zusage von Vergebung","Dekalog: Intention, Freiheit, Vergleich mit heutigen Gesetzen","Dilemmasituationen, Gewissen, Beurteilen von Entscheidungen"],
+
+  "Mensch 9/10":["ZIEL: sich als Individuum wahrnehmen, das Einfluss auf die Gesellschaft nehmen kann","eigener Lebensweg, Wertvorstellungen, Motive menschlichen Handelns","Menschsein aus christlicher Perspektive: Empathie, Freiheit, Kreativität, Humor","humane und künstliche Intelligenz","Umgang mit Sterben und Tod","Zukunftsperspektiven: Gemeinschaft, Nachhaltigkeit, soziale Gerechtigkeit","BASISBEGRIFFE: Individuum, Menschsein, Empathie"],
+  "Gott 9/10":["ZIEL: eigenen Standpunkt zur Gottesfrage bilden","Gott in Bildern, Literatur, Musik, Film und Werbung","existentielle Erfahrungen und Sinnfragen","Theodizeefrage und Antwortversuche; Hiob, Tun-Ergehen-Zusammenhang","Positionen, die eine Existenz Gottes bestreiten; Gottesglaube und Naturwissenschaft","BASISBEGRIFFE: Sinnfrage"],
+  "Bibel 9/10":["ZIEL: Relevanz biblischer Texte für gesellschaftliche Fragen erfassen","Urgeschichten: Kain und Abel (Gewalt), Noah (Zukunft), Turmbau (Größenwahn)","prophetische Rede heute und in biblischen Zeiten","Einsatz für Gerechtigkeit, Mut, Nachhaltigkeit","BASISBEGRIFFE: Urgeschichten, Prophet, Amos, Gerechtigkeit, Nachhaltigkeit"],
+  "Jesus Christus 9/10":["ZIEL: Botschaft vom Reich Gottes erfassen und Ideen entwickeln, sie erfahrbar zu machen","apokalyptische Endzeitstimmung als Folge von Not und Überfremdung","Gleichnisse vom Reich Gottes im Erwartungshorizont der Zuhörer","Reich Gottes im Kontext von Globalisierung: Menschenwürde, Solidarität, Gerechtigkeit","Erlöser- und Rettergestalten in Internet, Werbung, Film, Kunst, Musik","BASISBEGRIFFE: apokalyptische Endzeitstimmung, Reich Gottes"],
+  "Kirche 9/10":["ZIEL: Spannung zwischen Anspruch und Wirklichkeit der Institution Kirche wahrnehmen","Antijudaismus, Antisemitismus, Shoah/Holocaust","Kirche und NS-Regime: Reichskonkordat, Mit brennender Sorge","christlich motivierter Widerstand: Delp, Bonhoeffer, Scholl","Umgang mit Schuld nach 1945, Erinnerungsarbeit","gesellschaftliche Wahrnehmung von Kirche"],
+  "Religionen 9/10":["ZIEL: Bedeutung von Religion für ein friedliches Zusammenleben entdecken","Hinduismus und Buddhismus: Karma, Reinkarnation, Siddharta Gautama","fernöstliche und monotheistische Religionen im Vergleich","Fundamentalismus, Fanatismus, Intoleranz gegenüber Toleranz und Versöhnung","Voraussetzungen gelingenden Dialogs: Sachkenntnis, Perspektivwechsel, Empathie","BASISBEGRIFFE: Monotheismus, Toleranz"],
+  "Ethik 9/10":["ZIEL: Empathie und Konfliktfähigkeit entwickeln, Verantwortung übernehmen","persönliche Fragen: Veganismus, Blutspende, Organspende, Schwangerschaftsabbruch, Sterbebegleitung","globale Themen: Gerechtigkeit, Nachhaltigkeit, Toleranz, Menschenrechte, Krieg und Frieden","Bergpredigt; Umgang Jesu mit Ausgeschlossenen","Projektarbeit mit Hilfsorganisationen","BASISBEGRIFFE: Gerechtigkeit, Bergpredigt"]
+};
+
+/* Kompetenzbereiche – gruppiert, Bezeichnungen aus den Lehrplänen */
+const KOMPETENZEN = {
+  deutsch:[
+    {gruppe:"1 Sprechen und Zuhören", eintraege:[
+      "1.1 Grundlagen des Sprechens","1.2 Vor anderen sprechen","1.3 Mit anderen sprechen",
+      "1.4 Verstehendes Zuhören","1.5 Szenisches Spiel"]},
+    {gruppe:"2 Schreiben", eintraege:[
+      "2.1 Grundlegende Schreibfertigkeiten","2.2 Richtiges Schreiben","2.3 Planen und Entwerfen von Texten",
+      "2.4 Schreiben von Texten","2.5 Überarbeiten von Texten"]},
+    {gruppe:"3 Lesen", eintraege:[
+      "3.1 Lesetechniken und Lesestrategien","3.2 Literarische Texte verstehen und nutzen",
+      "3.3 Sachtexte verstehen und nutzen","3.4 Medien verstehen und nutzen"]},
+    {gruppe:"4 Sprache und Sprachgebrauch untersuchen", eintraege:[
+      "4.1 Äußerungen und Texte in Verwendungszusammenhängen reflektieren und bewusst gestalten",
+      "4.2 Textbeschaffenheit analysieren und reflektieren",
+      "4.3 Funktionen von Satz- und Wortarten kennen und nutzen",
+      "4.4 Laut-Buchstaben-Beziehungen und Regelhaftigkeiten reflektieren und anwenden"]}],
+  gw:[{gruppe:"", eintraege:[
+    "SK – Sachkompetenz","MK – Methodenkompetenz","OK – Orientierungskompetenz",
+    "BK – Beurteilungskompetenz","HK – Handlungskompetenz"]}],
+  mathematik:[{gruppe:"Allgemeine mathematische Kompetenzen", eintraege:[
+    "Mathematisch argumentieren","Probleme mathematisch lösen","Mathematisch modellieren",
+    "Mathematische Darstellungen verwenden",
+    "Mit symbolischen, formalen und technischen Elementen umgehen","Kommunizieren"]}],
+  reli:[{gruppe:"Grundlegende Kompetenzen", eintraege:[
+    "Sachkompetenz","Wahrnehmungskompetenz","Deutungskompetenz",
+    "Urteilskompetenz (Haltungs-/Diskurskompetenz)","Dialogkompetenz",
+    "Handlungs- und Partizipationskompetenz","Sprachkompetenz"]}],
+  frei:[{gruppe:"", eintraege:[
+    "Fachkompetenz","Methodenkompetenz","Sozialkompetenz","Selbstkompetenz"]}]
+};
+
+/* Leitperspektiven – bei GW die fünf des Lehrplans, sonst die übergreifenden */
+const LEITPERSPEKTIVEN = {
+  gw:["Individuum und Gesellschaft","Herrschaft, Partizipation und Demokratie",
+      "Arbeit und Wirtschaft – Ökologie und Nachhaltigkeit","Lebensraum Erde – Disparitäten",
+      "Internationalisierung, Globalisierung und Friedenssicherung"],
+  mathematik:["Medienbildung und Digitalität","Bildung für nachhaltige Entwicklung","Demokratiebildung",
+      "Berufliche Orientierung","Sprachsensibler Fachunterricht"],
+  reli:["Demokratiebildung","Bildung für nachhaltige Entwicklung",
+      "Medienbildung und informatische Bildung","Berufliche Bildung und berufliche Orientierung",
+      "Sprachsensibler Fachunterricht"],
+  standard:["BNE – Nachhaltigkeit","Demokratieerziehung","Medienkompetenz & Quellenkritik",
+      "Multiperspektivität","Berufsorientierung","Durchgängige Sprachbildung"]
+};
+
+/* =========================================================
+   OPERATOREN – Fachsprache der Aufgabenstellung
+   AFB I  Reproduktion · AFB II Reorganisation und Anwendung · AFB III Reflexion und Urteil
+   Religion: Operatorenliste des saarländischen Lehrplans 2025 (Original).
+   Deutsch: KMK-Operatorenkatalog Deutsch.
+   GW: Operatorenkatalog Gesellschaftswissenschaften nach Anforderungsbereichen.
+   Mathematik: Operatoren der Bildungsstandards Mathematik.
+   Sie sind LEHRKRAFT-INTERN. In der Aufgabenstellung erscheint nur das Verb.
+   ========================================================= */
+const OPERATOREN = {
+  deutsch:{
+    I:["nennen – ohne Erläuterung aufzählen","beschreiben – Text oder Sachverhalt mit eigenen Worten wiedergeben","wiedergeben / darstellen – Zusammenhänge unter einer Fragestellung sachbezogen ausführen","zusammenfassen – Inhalte komprimiert und strukturiert mit eigenen Worten darlegen"],
+    II:["analysieren / untersuchen – Merkmale eines Textes kriterienorientiert erschließen","begründen – einen Sachverhalt durch nachvollziehbare Argumente stützen","charakterisieren – Personen treffend beschreiben und ihre Funktion aufzeigen","erläutern / erklären – mit zusätzlichen Informationen verdeutlichen und begründen","herausarbeiten / erschließen – Sachverhalte erschließen, die nicht ausdrücklich genannt sind","vergleichen – Gemeinsamkeiten, Ähnlichkeiten und Unterschiede ermitteln"],
+    III:["begründet Stellung nehmen – eine fundierte, wertende Einsicht formulieren","beurteilen – unter Verwendung von Fachwissen zu einer begründeten Einschätzung gelangen","bewerten – Fachwissen mit eigenen begründeten Maßstäben anwenden","erörtern – Vielschichtigkeit einer These erkennen, Standpunkte abwägen, zu einem Urteil gelangen","interpretieren – auf Grundlage der Analyse zu einer schlüssigen Gesamtauslegung gelangen","gestalten / entwerfen – kreativ und produktorientiert bearbeiten","überprüfen – eine Aussage auf ihre Angemessenheit untersuchen"]
+  },
+  gw:{
+    I:["nennen – knapp aufzählen","bezeichnen – Begriffe in Tabellen, Schaubildern, Diagrammen oder Karten einfügen","beschreiben – schlüssig wiedergeben"],
+    II:["herausarbeiten – aus Texten entsprechend der Aufgabenstellung entnehmen","charakterisieren – typische Merkmale und Grundzüge aufzeigen","analysieren – Statistiken, Diagramme oder Konflikte systematisch untersuchen","erläutern – mit Beispielen oder Belegen veranschaulichen","erklären – schlüssig aus Kenntnissen in einen Zusammenhang stellen","einordnen / zuordnen – in einen vorgegebenen Zusammenhang stellen","begründen – Aussagen durch Argumente und Belege stützen","darstellen / erstellen – in strukturierter, oft grafischer Form aufzeigen","vergleichen – Kriterien festlegen, Gemeinsamkeiten und Unterschiede gegenüberstellen"],
+    III:["überprüfen – anhand von Material prüfen und ein begründetes Ergebnis formulieren","erörtern – Pro und Contra abwägen und zu einem begründeten Schluss kommen","beurteilen – anhand von Kriterien prüfen","bewerten – mit eigenen Maßstäben werten und die Wertung begründen","entwickeln – einen begründeten Lösungsvorschlag entwerfen","gestalten – rollen- und adressatengerecht Texte verfassen"]
+  },
+  mathematik:{
+    I:["angeben – Ergebnisse formulieren, ohne den Lösungsweg darzustellen","berechnen – Ergebnisse von einem Ansatz oder einer Formel aus durch Rechenoperationen gewinnen","darstellen – mathematische Objekte in üblicher Form wiedergeben","erkennen – Muster ohne ausführliche Begründung feststellen","identifizieren – mathematische Objekte mit Fachbegriffen verbinden"],
+    II:["anwenden / durchführen – nach bekannten Regeln zu einem definierten Ziel gelangen","auswerten – Daten zu einer begründeten Gesamtaussage zusammenführen","beschreiben – ein Verfahren in vollständigen Sätzen in Fachsprache wiedergeben","bestimmen / erschließen – Lösungen auf Basis von Vorkenntnissen finden und darstellen","deuten / interpretieren – Sachverhalte in eine andere mathematische Sichtweise übersetzen","entnehmen – aus Darstellungen Daten zur Beantwortung von Fragen aufbereiten","erklären / erläutern – Sachverhalte verständlich darstellen und veranschaulichen","skizzieren – wesentliche Eigenschaften grafisch vereinfacht darstellen","untersuchen – nach fachlich üblichen Kriterien zielorientiert erkunden","vergleichen – Gemeinsamkeiten und Unterschiede herausarbeiten","zuordnen – einen begründeten Zusammenhang zwischen Objekten herstellen"],
+    III:["begründen – Aussagen durch Berechnungen, Schlussregeln oder inhaltliche Argumentation verifizieren","beurteilen / bewerten – nach fachlichen Kriterien begründet einschätzen","beweisen – Aussagen unter Verwendung bekannter Sätze verifizieren","überprüfen – Sachverhalte in ergebnisoffenen Situationen verifizieren oder falsifizieren"]
+  },
+  reli:{
+    I:["nennen / benennen – ausgewählte Elemente, Merkmale, Begriffe, Personen unkommentiert angeben","darstellen / aufzeigen – Gedankengang oder Hauptaussage mit eigenen Worten darlegen","wiedergeben / berichten / erzählen – einen Sachverhalt in Fachsprache mit eigenen Worten ausdrücken","beschreiben – Merkmale eines Bildes oder Materials in Einzelheiten darlegen","wahrnehmen / betrachten – Phänomene bewusst sehen und detailliert beschreiben","erkennen / nachvollziehen – Schlüsselbegriffe und Kernaussagen komprimiert darlegen","sich zurechtfinden – im Umgang mit der Bibel als Buch erworbene Fertigkeiten anwenden"],
+    II:["einordnen – einen Sachverhalt in einen neuen Zusammenhang stellen oder eine Position bestimmen","begründen – Aussagen durch Argumente stützen","erläutern / erklären – mit Informationen und Beispielen nachvollziehbar veranschaulichen","ableiten / erschließen – von einem Material ausgehend einen Sachverhalt erkennen und darstellen","vergleichen / unterscheiden – Gemeinsamkeiten, Ähnlichkeiten und Unterschiede ermitteln","untersuchen – Elemente, Strukturmerkmale und Zusammenhänge systematisch erschließen","in Beziehung setzen – Zusammenhänge begründet herstellen"],
+    III:["sich auseinandersetzen mit – ein begründetes eigenes Urteil entwickeln","interpretieren – ein Material analysieren und zu einer schlüssigen Gesamtauslegung gelangen","beurteilen / bewerten / Stellung nehmen – sich begründet positionieren (Sach- bzw. Werturteil)","diskutieren – Vielschichtigkeit erkennen, Thesen und Argumente entfalten, begründet schließen","prüfen / überprüfen / reflektieren / deuten – kritisch befragen und begründet beurteilen","aus unterschiedlicher Perspektive betrachten – eine Position aus anderer Sicht beleuchten","Perspektiven entwickeln – Schlussfolgerungen ziehen, Handlungsmöglichkeiten entfalten","gestalten / anwenden – sich mit einer Fragestellung kreativ auseinandersetzen"]
+  },
+  frei:{
+    I:["nennen","beschreiben","wiedergeben","zusammenfassen"],
+    II:["erläutern","erklären","begründen","vergleichen","untersuchen","einordnen","anwenden"],
+    III:["beurteilen","bewerten","Stellung nehmen","erörtern","überprüfen","entwickeln","gestalten"]
+  }
+};
+function operatorenFuer(fach){ return OPERATOREN[fach] || OPERATOREN.frei; }
+
+/* =========================================================
+   SPRACHPROFIL je Doppeljahrgang
+   Zahlen statt Adjektive – „einfache Sprache" verhindert nichts.
+   ========================================================= */
+const SPRACHPROFIL = {
+  "5-6":{
+    satz:"höchstens 12 Wörter je Satz, ein Gedanke je Satz",
+    bau:"Hauptsätze. Nebensatz nur mit weil, wenn oder dass. Kein Passiv, kein Konjunktiv.",
+    wort:"Alltagswörter. Keine Nominalisierungen auf -ung, -heit, -keit im Auftragssatz. Zusammensetzungen aus höchstens zwei Wörtern.",
+    fach:"Jedes Fachwort beim ersten Mal in einem Satz erklären und in den Wortspeicher der Station schreiben.",
+    vertraut:"nennen · aufschreiben · beschreiben · ordnen · vergleichen · erklären · begründen · gestalten",
+    erklaeren:"untersuchen · zusammenfassen · darstellen · einordnen · beurteilen"
+  },
+  "7-8":{
+    satz:"höchstens 15 Wörter je Satz",
+    bau:"Ein Nebensatz je Satz ist erlaubt. Passiv nur, wenn der Handelnde wirklich unwichtig ist.",
+    wort:"Nominalisierungen sparsam. Bildliche Wendungen erklären, nicht voraussetzen.",
+    fach:"Fachwörter werden aufgebaut: erste Nennung mit Erklärung, danach konsequent verwenden.",
+    vertraut:"alles aus 5/6 · untersuchen · zusammenfassen · darstellen · einordnen · beurteilen",
+    erklaeren:"analysieren · charakterisieren · erläutern · herausarbeiten · Stellung nehmen · überprüfen"
+  },
+  "9-10":{
+    satz:"höchstens 20 Wörter je Satz",
+    bau:"Zwei Nebensätze je Satz sind die Grenze. Verschachtelungen auflösen.",
+    wort:"Fachsprache wird bewusst aufgebaut – aber jede neue Wendung einmal erklärt.",
+    fach:"Prüfungssprache üben: die Operatoren stehen so da, wie sie später im Abschluss stehen.",
+    vertraut:"alles aus 7/8",
+    erklaeren:"erörtern · interpretieren · sich auseinandersetzen mit · diskutieren"
+  }
+};
+function sprachprofil(klasse){
+  const k = parseInt(klasse,10);
+  return k <= 6 ? SPRACHPROFIL["5-6"] : k <= 8 ? SPRACHPROFIL["7-8"] : SPRACHPROFIL["9-10"];
+}
+
+/* Wörter, die regelmäßig aus der Oberstufe in Schüleraufgaben rutschen.
+   Links das Wort, rechts, was stattdessen dasteht. */
+const SPERRLISTE = [
+  ["reflektieren","denk darüber nach / schreib auf, was du gelernt hast"],
+  ["problematisieren","zeige, wo es schwierig wird"],
+  ["kontextualisieren","erkläre, wann und wo das passiert ist"],
+  ["Relevanz","warum das wichtig ist"],
+  ["Ambivalenz / Spannungsverhältnis","was gut daran ist und was nicht"],
+  ["Dimension / Aspekt / Sachverhalt","Seite · Punkt · Sache"],
+  ["Diskurs","Streit · Gespräch · Debatte"],
+  ["Instanz / Narrativ / immanent","ganz streichen"],
+  ["exemplarisch","an einem Beispiel"],
+  ["differenziert betrachten","schau dir beide Seiten an"],
+  ["kritisch hinterfragen","frag nach: Stimmt das wirklich?"],
+  ["sich auseinandersetzen mit","(nur mit Konkretisierung: womit genau, wie?)"],
+  ["Vertiefung","der schwierigere Teil"],
+  ["transferieren","übertrage auf …"],
+  ["Perspektivwechsel vollziehen","versetze dich in … hinein"]
+];
+
+/* =========================================================
+   AUFGABENFORMEN – Vorrat statt Schablone
+   Ein Hauptauftrag mit drei Unterpunkten ist EINE Form, nicht DIE Form.
+   ========================================================= */
+const AUFGABENFORMEN = [
+  ["Einschritt",     "ein Satz, ein Operator, in einem Zug erledigt",
+                     "kurze Übung, Wiederholung, digitale Aufgabe mit Sofortrückmeldung",
+                     "Ordne die Bilder der richtigen Jahreszeit zu."],
+  ["Zweischritt",    "erst tun, dann sichern",
+                     "wenn ein Ergebnis festgehalten werden muss",
+                     "Lies den Text auf Seite 42. Schreibe danach drei Stichworte in dein Heft."],
+  ["Mehrschritt",    "ein Hauptauftrag, darunter Teilschritte a) b) c)",
+                     "Textarbeit und alles, was wirklich Schritt für Schritt geht – NICHT als Standard",
+                     "1. Lies den Text. a) Markiere unbekannte Wörter. b) Schlag sie nach. c) Erkläre den Text mit eigenen Worten."],
+  ["Wahlaufgabe",    "zwei gleichwertige Wege, das Kind entscheidet",
+                     "Zugangswahl, Blütenaufgaben, unterschiedliche Lerntypen",
+                     "Entweder: Zeichne den Ablauf als Bild. Oder: Erkläre den Ablauf in fünf Sätzen."],
+  ["Produktauftrag", "Auftrag plus Kriterienliste statt Teilschritten",
+                     "handelnde Aufgaben, Plakat, Modell, Podcast, Ausstellung",
+                     "Baue das Nildelta im Schuhkarton. Dein Modell zeigt: Fluss, Fruchtland, Wüste, eine Siedlung."],
+  ["Forscherauftrag","eine offene Leitfrage, zwei Hilfsfragen, freier Weg",
+                     "Erforschen, Transfer, Projektbereiche",
+                     "Finde heraus, warum die Menschen am Nil siedelten. Hilfsfragen: Woher kam das Wasser? Was wuchs dort?"],
+  ["Partneraufgabe", "zwei Rollen A und B mit unterschiedlichem Auftrag",
+                     "Urteilen, Positionen, Dilemma, Peer-Erklärung",
+                     "A sammelt Gründe dafür, B Gründe dagegen. Danach überzeugt ihr euch gegenseitig."],
+  ["Sortierauftrag", "Material plus Regel, ohne Teilschritte",
+                     "Ordnen, Zeitleiste, Kategorien, Begriffsarbeit",
+                     "Lege die Karten in die richtige Reihenfolge. Die Regel steht auf der Rückseite."]
+];
+
+/* Anspruchsebenen nach Fach und Klassenstufe */
+function niveauOptionen(fach, klasse){
+  const k = parseInt(klasse,10);
+  if(fach === "gw") return [
+    "Verbindliche Basiskompetenzen","Basis- und fakultative Inhalte",
+    "Basis mit Erweiterungs- und Vertiefungskompetenzen","alle drei Ebenen parallel"];
+  if(fach === "reli") return [
+    "nur verpflichtende Inhalte","verpflichtende und fakultative Inhalte",
+    "lerngruppenspezifische Auswahl","alle Ebenen parallel"];
+  if(k <= 6) return ["innere Differenzierung (integrierender Unterricht)"];
+  if(k <= 8) return ["Grundkurs (G)","Erweiterungskurs (E)","G und E parallel"];
+  if(k === 9) return ["Grundkurs (G)","Erweiterungskurs (E)","Aufbaukurs (A)","alle Kurse parallel"];
+  return ["Erweiterungskurs (E)","Aufbaukurs (A)","E und A parallel"];
+}
+
+const LEHRPLANQUELLE = {
+  deutsch:"Kernlehrplan Deutsch, Gemeinschaftsschule Saarland, Kl. 5–10 (Juli 2012). Der Lehrplan ist rein kompetenzorientiert – Unterrichtseinheiten legt die Fachkonferenz fest. Die Themenliste ist ein Vorschlag, keine Lehrplanvorgabe.",
+  gw:"Lehrplan Gesellschaftswissenschaften (Verbundfach), Gemeinschaftsschule Saarland: Kl. 5/6 Erprobungsphase 2014, Kl. 7/8 Fassung 2021, Kl. 9/10 Fassung 2022. Themenfelder und Stundenrichtwerte wortgleich übernommen.",
+  mathematik:"Lehrplan Mathematik, Gemeinschaftsschule Saarland, Klassenstufen 5 und 6 (Fassung 2025) – Themenfelder und Unterthemen wortgleich übernommen. Kompetenzbereiche: Allgemeine mathematische Kompetenzen (Fassung Juli 2018). Querschnittsthemen der Fassung 2025: Medienbildung und Digitalität, BNE, Demokratiebildung, Berufliche Orientierung, sprachsensibler Fachunterricht. Der Lehrplan gilt für 5 und 6 gemeinsam; fakultative Kompetenzen entscheidet die Fachkonferenz.",
+  reli:"Lehrplan Katholische Religion, Gemeinschaftsschule Saarland, Klassenstufen 5 bis 10 (Fassung 2025). Der Lehrplan arbeitet mit sieben Lernbereichen (Mensch, Gott, Bibel, Jesus Christus, Kirche, Religionen, Ethik) je Doppeljahrgang; Lernbereiche sind KEINE Unterrichtsthemen, sondern Rahmen, in denen Themen gebildet werden. Stundenrichtwerte weist der Lehrplan nicht aus. Inhalte sind teils verpflichtend, teils fakultativ. Die Operatorenliste des Lehrplans ist im Werkzeug hinterlegt.",
+  frei:"Kompetenzbereiche frei eintragen"
+};
+
+
+/* =========================================================
+   FORMATE OFFENER LERNUMGEBUNGEN
+   ========================================================= */
+const FORMATE = {
+  lerndorf:{
+    name:"Lerndorf", einheit:"Haus", plural:"Häuser", karte:"Lernlandkarte mit Häusern",
+    beschreibung:"Häuser auf einer Lernlandkarte, alle gleichzeitig geöffnet, eigenes Tempo.",
+    auftakt:"Lerndorf eröffnen: Leitfrage, Lernlandkarte, Arbeitsweise und Regeln klären",
+    bilanz:"Dorfversammlung: gemeinsame Ergebnisse, offene Fragen, Nachsteuern",
+    abschluss:"Rückblick auf die Leitfrage · Mein Wachstum"
+  },
+  lernwelt:{
+    name:"Lernwelt", einheit:"Station", plural:"Stationen", karte:"Abenteuerkarte mit Inseln",
+    beschreibung:"Stationen auf einer Abenteuerkarte, frei oder gestaffelt zugänglich.",
+    auftakt:"Lernwelt eröffnen: Leitfrage, Abenteuerkarte, Arbeitsweise klären",
+    bilanz:"Zwischenstopp: Ergebnisse aus den Stationen zusammentragen",
+    abschluss:"Rückblick auf die Leitfrage · Mein Wachstum"
+  },
+  wochenplan:{
+    name:"Wochenplan / Lernbüro", einheit:"Baustein", plural:"Bausteine", karte:"Planübersicht",
+    beschreibung:"Pflicht-, Wahl- und Bonusaufgaben mit Zeitbudget, freie Einteilung.",
+    auftakt:"Planauftakt: Wochenplan vorstellen, Ziele setzen, Arbeitsweise klären",
+    bilanz:"Lernberatung und Zwischenbilanz im Klassenverband",
+    abschluss:"Planabschluss: Ergebnisse sichern, Selbsteinschätzung"
+  },
+  werkstatt:{
+    name:"Werkstatt / Freiarbeit", einheit:"Angebot", plural:"Angebote", karte:"Werkstattübersicht",
+    beschreibung:"Angebote zur freien Wahl, offene Reihenfolge, hohe Selbststeuerung.",
+    auftakt:"Werkstatt eröffnen: Angebote vorstellen, Ziele setzen",
+    bilanz:"Werkstattgespräch: Zwischenstand, gegenseitige Beratung",
+    abschluss:"Werkstattschluss: Ergebnisse ausstellen, Reflexion"
+  },
+  lernpfad:{
+    name:"Lernpfad", einheit:"Etappe", plural:"Etappen", karte:"Lernlandkarte mit Etappen",
+    beschreibung:"Etappen bauen aufeinander auf, individuelles Tempo, gestaffelte Freischaltung.",
+    auftakt:"Auftakt: Lernpfad und Etappenziele vorstellen",
+    bilanz:"Etappenstopp: gemeinsame Sicherung, Hürden klären",
+    abschluss:"Ziel erreicht: Rückschau auf den Pfad, Leitfrage beantworten"
+  },
+  projekt:{
+    name:"Projekt", einheit:"Projektbereich", plural:"Projektbereiche", karte:"Projektübersicht",
+    beschreibung:"Arbeitsbereiche laufen parallel auf ein gemeinsames Produkt zu.",
+    auftakt:"Projektauftakt: Auftrag klären, Bereiche vorstellen, Zeitplan aufstellen",
+    bilanz:"Meilenstein: Zwischenstände vorstellen, nachsteuern",
+    abschluss:"Präsentation und Auswertung des Projekts"
+  }
+};
+
+/* Arbeitstitel der Stationen: [Name, kurzer Themensatz] – schülerorientiert und
+   motivierend formuliert; das Reihenthema steht im Kopf und wird nicht wiederholt */
+const STATIONSTITEL = {
+  lerndorf:{
+    erarbeiten1:[["Startklar-Haus","alles, was du zum Loslegen brauchst"],["Wortschatz-Werkstatt","die wichtigen Begriffe in den Griff bekommen"]],
+    erarbeiten2:[["Forscherlabor","genau hinsehen und Belege finden"],["Perspektivenraum","dieselbe Sache aus mehreren Augen sehen"],["Spurensuche","was steckt wirklich dahinter?"]],
+    ueben:[["Trainingshalle","üben, bis es sitzt"],["Spielehaus","spielerisch festigen"]],
+    transfer:[["Kreativwerkstatt","dein eigenes Produkt gestalten"],["Haus der Entscheidungen","deine Meinung, gut begründet"]]
+  },
+  lernwelt:{
+    erarbeiten1:[["Basislager","alles, was du zum Loslegen brauchst"],["Wortschatz-Werkstatt","die wichtigen Begriffe in den Griff bekommen"]],
+    erarbeiten2:[["Forscherinsel","genau hinsehen und Belege finden"],["Spurensuche","was steckt wirklich dahinter?"],["Schatzkammer","Quellen und Material auswerten"]],
+    ueben:[["Trainingsarena","üben, bis es sitzt"],["Quiz-Arena","spielerisch festigen"]],
+    transfer:[["Kreativwerkstatt","dein eigenes Produkt gestalten"],["Profi-Insel","auf etwas völlig Neues übertragen"]]
+  },
+  wochenplan:{
+    erarbeiten1:[["Startklar","alles, was du zum Loslegen brauchst"],["Wortschatz","die wichtigen Begriffe in den Griff bekommen"]],
+    erarbeiten2:[["Genauer hinsehen","untersuchen und Belege finden"],["Material knacken","Quellen und Material auswerten"],["Zwei Seiten","Positionen gegenüberstellen"]],
+    ueben:[["Training","üben, bis es sitzt"],["Fehlerjagd","typische Stolpersteine bearbeiten"]],
+    transfer:[["Selbst gemacht","dein eigenes Produkt gestalten"],["Anwenden","auf eine neue Situation übertragen"]]
+  },
+  werkstatt:{
+    erarbeiten1:[["Startklar-Tisch","alles, was du zum Loslegen brauchst"],["Nachschlage-Ecke","Begriffe klären und ordnen"]],
+    erarbeiten2:[["Forschertisch","genau hinsehen und Belege finden"],["Materialtisch","Quellen und Material auswerten"],["Standpunkt-Ecke","Positionen gegenüberstellen"]],
+    ueben:[["Übungstisch","üben, bis es sitzt"],["Spieltisch","spielerisch festigen"]],
+    transfer:[["Bastel- und Bauecke","etwas herstellen, das bleibt"],["Weiterdenk-Tisch","eigene Position entwickeln"]]
+  },
+  lernpfad:{
+    erarbeiten1:[["Aufbruch","alles, was du zum Loslegen brauchst"],["Sprachcamp","die wichtigen Begriffe in den Griff bekommen"]],
+    erarbeiten2:[["Tiefer graben","untersuchen und Belege finden"],["Perspektivwechsel","dieselbe Sache aus mehreren Augen sehen"],["Alleingang","ein Material eigenständig erschließen"]],
+    ueben:[["Trainingslager","üben, bis es sitzt"],["Fehlerjagd","typische Stolpersteine bearbeiten"]],
+    transfer:[["Zielgerade","auf eine neue Situation übertragen"],["Meisterstück","dein eigenes Produkt gestalten"]]
+  },
+  projekt:{
+    erarbeiten1:[["Auftrag klären","worum geht es und was wollen wir wissen?"],["Grundlagen","Begriffe und Basiswissen klären"]],
+    erarbeiten2:[["Recherchebüro","Material suchen und sichten"],["Auswahlrunde","Ergebnisse ordnen und auswählen"],["Quellencheck","prüfen, worauf man sich verlassen kann"]],
+    ueben:[["Rohfassung","erstellen und überarbeiten"],["Feinschliff","Sprache und Gestaltung schärfen"]],
+    transfer:[["Endspurt","Produkt fertigstellen"],["Bühne","Präsentation vorbereiten"]]
+  }
+};
+
+const METHODEN = {
+  erarbeiten1:["Textarbeit mit Markierungstechnik","Lernvideo mit Beobachtungsauftrag","Nachschlagen in der Wissenssammlung","Bildimpuls mit Notizraster"],
+  erarbeiten2:["Quellenanalyse","Materialgestützte Partnerarbeit","Expertenrunde","Pro-Contra-Karten"],
+  ueben:["Übungskarussell","Partnercheck","Lernspiel","Selbstkontrolle mit Lösungsblatt","Escape Room"],
+  transfer:["Kreatives Schreiben","Erklärvideo erstellen","Rollenspiel","Podcast / Interview","Modell oder Plakat"]
+};
+const METHODEN_ZUGANG = {
+  A:"Textarbeit mit Markierungstechnik, Merkmale zerlegen",
+  E:"Recherche, Experiment, Quellenarbeit",
+  I:"Kreatives Schreiben, Gestalten, Rollenspiel",
+  O:"Sortieren, Zeitleiste, Tabelle, Mindmap",
+  U:"Pro-Contra, Diskussion, Stellungnahme"
+};
+let PLAN_ANTEIL = {}, PLAN_PROPHASE = {};
+const SOZIALFORMEN = ["EA","PA","EA/PA","GA","PA/GA"];
+
+/* Die drei Wege nach Kopf, Herz und Hand.
+   Sie verteilen sich über die REIHE, nicht über jede einzelne Station:
+   Kartenarbeit lohnt sich analog am Atlas, Ägypten baut man im Schuhkarton,
+   die Mini-Map läuft am Tablet. Eine gesunde Mischung, kein Dreierpack je Station. */
+const WEGE = {
+  analog:  {name:"analog",  kurz:"Buch, Atlas, Text, Karte, Karteikarten, Heft", farbe:"#5B96E3"},
+  digital: {name:"digital", kurz:"Lernwelt, Recherche, Quiz, Video, Padlet, OSS", farbe:"#5FBFA0"},
+  handelnd:{name:"handelnd",kurz:"bauen, gestalten, spielen, befragen, darstellen", farbe:"#E9B44C"}
+};
+const WEG_REIHE = ["analog","digital","handelnd"];
+/* Welcher Weg in welcher Phase am nächsten liegt – Ausgangspunkt der Mischung,
+   keine Festlegung. Die Reihenfolge sorgt dafür, dass nie drei gleiche Wege
+   hintereinander stehen. */
+const WEG_JE_PHASE = {
+  orientieren:["analog","digital"],
+  erarbeiten1:["analog","digital","analog"],
+  erarbeiten2:["digital","analog","handelnd"],
+  ueben:["analog","digital"],
+  transfer:["handelnd","digital","handelnd"],
+  bilanz:["handelnd","analog"]
+};
+const REFLEXIONSFRAGEN = [
+  "Was hast du heute geschafft – und was nimmst du dir für nächstes Mal vor?",
+  "Wo bist du hängen geblieben? Wer oder was hat dir geholfen?",
+  "Was war heute neu für dich?",
+  "Wem hast du heute etwas erklärt – wie ist es gelaufen?",
+  "Welche Station hat dich am meisten überrascht?",
+  "Was würdest du jemandem raten, der diese Station noch vor sich hat?",
+  "Woran merkst du, dass du weitergekommen bist?"
+];
+
+/* =========================================================
+   ZUSTAND
+   ========================================================= */
+let ZUSTAND = {stationen:[], stunden:[], meta:{}};
+let ARCHIV = [], BOTS = [], QUELLEN = [];
+
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+function iso(d){
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function minText(m){
+  if(!m) return "offen";
+  return m >= 60 ? (Math.round(m/6)/10).toString().replace(".",",")+" Std" : m+" Min";
+}
+
+/* =========================================================
+   KALENDER
+   ========================================================= */
+/* =========================================================
+   DIDAKTIK-MOTOR
+   ========================================================= */
+function lnFormate(){ return $$("#lnformate .chip.an").map(c => c.dataset.w); }
+function klnFormate(){ return $$("#klnformate .chip.an").map(c => c.dataset.w); }
+
+function lnStunden(){
+  const art = $("#lnart").value;
+  if(art === "keiner") return {vorb:0, durch:0, rueck:0, gesamt:0, art};
+  const vorb  = $("#lnvorb").value === "ja" ? 1 : 0;
+  const rueck = $("#lnrueck").value === "ja" ? 1 : 0;
+  let durch = 1;
+  if(art === "alternativ"){
+    /* Bei freiem Zeitpunkt läuft die Erbringung in der Arbeitsphase mit;
+       es bleibt eine Stunde für Vorstellung und Würdigung. */
+    durch = $("#lnzeitpunkt").value === "frei" ? 1 : 2;
+  }
+  return {vorb, durch, rueck, gesamt: vorb+durch+rueck, art};
+}
+function verteile(netto, profil){
+  const roh = Object.keys(profil).map(id => ({id, wert: netto * profil[id]}));
+  let zug = roh.map(r => ({id:r.id, n: Math.floor(r.wert), rest: r.wert - Math.floor(r.wert)}));
+  let vergeben = zug.reduce((s,z)=>s+z.n, 0);
+  zug.sort((a,b)=>b.rest-a.rest);
+  let i = 0;
+  while(vergeben < netto && i < 200){ zug[i % zug.length].n++; vergeben++; i++; }
+  const karte = {}; zug.forEach(z => karte[z.id] = z.n);
+  if(netto < 6){
+    karte.erarbeiten1 += karte.erarbeiten2; karte.erarbeiten2 = 0;
+    if(karte.transfer && karte.bilanz === 0){ karte.bilanz = 1; karte.transfer--; }
+  }
+  if(netto >= 4 && karte.bilanz === 0){
+    const g = Object.keys(karte).reduce((a,b)=> karte[a] >= karte[b] ? a : b); karte[g]--; karte.bilanz = 1;
+  }
+  if(netto >= 2 && karte.orientieren === 0){
+    const g = Object.keys(karte).reduce((a,b)=> karte[a] >= karte[b] ? a : b); karte[g]--; karte.orientieren = 1;
+  }
+  const grenzen = {orientieren:3, bilanz:2};
+  let ueber = 0;
+  Object.keys(grenzen).forEach(k => { if(karte[k] > grenzen[k]){ ueber += karte[k]-grenzen[k]; karte[k] = grenzen[k]; } });
+  const ziele = ["erarbeiten2","ueben","transfer","erarbeiten1"];
+  let j = 0;
+  while(ueber > 0){ karte[ziele[j % ziele.length]]++; ueber--; j++; }
+  if(netto >= 2 && karte.erarbeiten1 === 0){
+    const g = Object.keys(karte).filter(k => k !== "orientieren").reduce((a,b)=> karte[a] >= karte[b] ? a : b);
+    if(karte[g] > 0){ karte[g]--; karte.erarbeiten1 = 1; }
+  }
+  if(netto >= 8){
+    ["transfer","erarbeiten2","ueben"].forEach(k => {
+      if(karte[k] === 0){
+        const g = Object.keys(karte).reduce((a,b)=> karte[a] >= karte[b] ? a : b);
+        if(karte[g] > 1){ karte[g]--; karte[k] = 1; }
+      }
+    });
+  }
+  return karte;
+}
+function profilSchluessel(){ return $("#fach").value + ":" + $("#schwerpunkt").value; }
+function profilMitAnpassung(){
+  const basis = {...(PROFILE[profilSchluessel()] || PROFILE["frei:standard"])};
+  const het = $("#hetero").value, lesen = $("#lesen").value, daz = $("#daz").value;
+  let schub = 0;
+  if(het === "hoch") schub += .05;
+  if(lesen === "niedrig") schub += .04;
+  if(daz === "viele") schub += .03;
+  if(het === "gering") schub -= .03;
+  if(schub !== 0){
+    const nehmen = Math.min(schub, basis.transfer*.6 + basis.erarbeiten2*.4);
+    const vonT = nehmen*.55, vonE2 = nehmen*.45;
+    basis.transfer = Math.max(.04, basis.transfer - vonT);
+    basis.erarbeiten2 = Math.max(.05, basis.erarbeiten2 - vonE2);
+    basis.ueben = basis.ueben + vonT + vonE2;
+  }
+  const summe = Object.values(basis).reduce((a,b)=>a+b,0);
+  Object.keys(basis).forEach(k => basis[k] = basis[k]/summe);
+  return basis;
+}
+function differenzierungsstufen(){
+  const het = $("#hetero").value, niv = $("#niveau").value || "";
+  return (het === "hoch" || /parallel|innere Differenzierung/i.test(niv)) ? 5 : 3;
+}
+function stufenText(){
+  return differenzierungsstufen() === 5
+    ? "5-fach (↓↓ stark geführt · ↓ geführt · → Standard · ↑ erweiternd · ↑↑ Experten)"
+    : "3-fach (↓ mit Unterstützung · → selbstständig · ↑ auf Spurensuche)";
+}
+function aeiouModus(){ return $("#aeioumodus").value; }
+
+/* Material einer Station zuordnen: aus den Materialquellen alles heraussuchen,
+   dessen Feld „Gehört zu" auf diese Nummer oder diesen Namen zeigt.
+   Ergebnis ist die Fundstelle im Klartext: Quelle, Seite, Aufgabe. */
+function fundstelleFuer(nr, name){
+  const treffer = QUELLEN.filter(q => {
+    const zu = (q.zu||"").toLowerCase().trim();
+    if(!zu) return false;
+    if(name && zu.includes(name.toLowerCase())) return true;
+    return (zu.match(/\d+/g)||[]).includes(String(nr));
+  });
+  return treffer.map(q => q.titel + (q.fund ? ", " + q.fund : "")).join(" · ");
+}
+/* Bei Zugangswahl bekommt JEDE Station alle fünf Zugänge – ist AEIOU aus, keinen. */
+function zugaengeFuer(){
+  return aeiouModus() === "aus" ? [] : AEIOU_REIHE.slice();
+}
+
+/* ---------- Die drei Wege über die Reihe verteilen ----------
+   Ziel ist eine gesunde Mischung, nicht ein Dreierpack je Station.
+   Erst nach Phase vorbelegen, dabei nie drei gleiche hintereinander,
+   danach ausgleichen, bis jeder Weg mindestens ein Fünftel der Zeit trägt. */
+function verteileWege(stationen){
+  const echte = stationen.filter(s => s.verbind !== "Bonus");
+  const jePhase = {};
+  echte.forEach((s,i) => {
+    const kandidaten = WEG_JE_PHASE[s.phase] || WEG_REIHE;
+    jePhase[s.phase] = (jePhase[s.phase] || 0);
+    let w = kandidaten[jePhase[s.phase]++ % kandidaten.length];
+    const vor = echte[i-1] && echte[i-1].weg, vorvor = echte[i-2] && echte[i-2].weg;
+    if(w === vor && w === vorvor) w = WEG_REIHE.find(x => x !== w && x !== vor) || w;
+    s.weg = w;
+  });
+  /* Ausgleich: Trägt ein Weg weniger als ein Fünftel der Stationszeit,
+     bekommt er die Station, die am ehesten entbehrlich ist. */
+  const gesamt = () => echte.reduce((a,s)=>a+(s.minuten||1),0) || 1;
+  for(let runde = 0; runde < 6; runde++){
+    const anteil = {};
+    WEG_REIHE.forEach(w => anteil[w] = echte.filter(s=>s.weg===w).reduce((a,s)=>a+(s.minuten||1),0)/gesamt());
+    const schwach = WEG_REIHE.filter(w => anteil[w] < 0.2).sort((a,b)=>anteil[a]-anteil[b])[0];
+    if(!schwach) break;
+    const stark = WEG_REIHE.slice().sort((a,b)=>anteil[b]-anteil[a])[0];
+    /* aus dem stärksten Weg die Station nehmen, deren Phase den schwachen Weg gut trägt */
+    const kandidat = echte.filter(s => s.weg === stark)
+      .sort((a,b) => ((WEG_JE_PHASE[b.phase]||[]).includes(schwach) ? 1 : 0)
+                   - ((WEG_JE_PHASE[a.phase]||[]).includes(schwach) ? 1 : 0))[0];
+    if(!kandidat) break;
+    kandidat.weg = schwach;
+  }
+  const bonus = stationen.filter(s => s.verbind === "Bonus");
+  bonus.forEach(s => s.weg = "handelnd");
+  return stationen;
+}
+function wegAnteile(){
+  const echte = ZUSTAND.stationen.filter(s => s.verbind !== "Bonus");
+  const gesamt = echte.reduce((a,s)=>a+(s.minuten||0),0) || 1;
+  const r = {};
+  WEG_REIHE.forEach(w => r[w] = {
+    minuten: echte.filter(s=>s.weg===w).reduce((a,s)=>a+(s.minuten||0),0),
+    anzahl:  echte.filter(s=>s.weg===w).length
+  });
+  WEG_REIHE.forEach(w => r[w].anteil = Math.round(r[w].minuten/gesamt*100));
+  return r;
+}
+
+/* ---------- Zeitrechnung ---------- */
+/* Eine Stunde dauert an Krystinas Schule immer 70 Minuten:
+   15 Minuten Impuls, 40 Minuten Arbeitsphase, 15 Minuten Reflexion. */
+const STUNDE = {dauer:70, impuls:15, reflex:15, arbeit:40};
+function zeitrahmen(){ return {...STUNDE}; }
+
+/* ---------- Plan bauen ---------- */
+function bauePlan(){
+  const format = $("#format").value, F = FORMATE[format];
+  const thema = $("#thema").value.trim() || "dem Reihenthema";
+  const gesamt = parseInt($("#stunden").value,10) || 12;
+  const ln = lnStunden();
+  const netto = Math.max(2, gesamt - ln.gesamt);
+  const verteilung = verteile(netto, profilMitAnpassung());
+  const zr = zeitrahmen();
+  const reihenfolge = $("#reihenfolge").value || "frei";
+  const wahl = $("#wahlanteil").value;
+  const bonusAn = $("#bonus").value === "ja";
+  const expertenAn = $("#experten").value === "ja";
+  const medien = $$("#medien .chip.an").map(c => c.dataset.w);
+
+  const bilanzStd = Math.max(1, verteilung.bilanz || 1);
+  const arbeitsStunden = Math.max(1, netto - 1 - bilanzStd);   // volle Stationsstunden
+  /* Auftakt trägt die halbe Arbeitsphase bei, Abschlussstunden gar nicht */
+  const stationsMinuten = Math.round(zr.arbeit * (arbeitsStunden + 0.5));
+
+  /* --- Stationen --- */
+  const modus = aeiouModus();
+  const stationen = [];
+  let nr = 0;
+
+  if(modus === "aufteilung"){
+    /* AEIOU teilt die Stationen auf: fünf Zugänge zum selben Lernziel */
+    const namen = zugangsNamen($("#klasse").value);
+    AEIOU_REIHE.forEach((k,i) => {
+      stationen.push({
+        nr: ++nr, phase:"erarbeiten2", zugang:k, zugaenge:[k],
+        name: namen[k][0], thema: namen[k][1],
+        minuten:0, verbind: (wahl === "hoch" && i >= 3) ? "Wahlpflicht" : "Pflicht",
+        aufgaben: AUFGABENTYPEN,
+        methode: METHODEN_ZUGANG[k], sozial: SOZIALFORMEN[i % SOZIALFORMEN.length],
+        material: medien.length ? medien[i % medien.length] : "",
+        fundstelle: fundstelleFuer(nr, namen[k][0]),
+        abgabe: medien.includes("OSS/Moodle") ? "OSS / Moodle" : "Lernwegeheft"
+      });
+    });
+  } else {
+    /* Stationen nach Verlauf; AEIOU-Zugänge stehen INNERHALB jeder Station zur Wahl */
+    const offenePhasen = ["erarbeiten1","erarbeiten2","ueben","transfer"];
+    const anteil = {};
+    let summe = 0;
+    offenePhasen.forEach(pp => { anteil[pp] = verteilung[pp] || 0; summe += anteil[pp]; });
+    if(summe === 0){ anteil.erarbeiten1 = 1; }
+
+    let anzahl = $("#anzahl").value === "auto"
+      ? Math.min(8, Math.max(3, Math.round(netto/2.5)))
+      : parseInt($("#anzahl").value,10);
+
+    const proPhase = {};
+    offenePhasen.forEach(pp => proPhase[pp] = anteil[pp] > 0 ? 1 : 0);
+    let vergeben = Object.values(proPhase).reduce((x,y)=>x+y,0);
+    while(vergeben < anzahl){
+      let best = null, bestWert = -1;
+      offenePhasen.forEach(pp => {
+        if(anteil[pp] <= 0) return;
+        const wert = anteil[pp] / (proPhase[pp] + 1);
+        if(wert > bestWert){ bestWert = wert; best = pp; }
+      });
+      if(!best) break;
+      proPhase[best]++; vergeben++;
+    }
+    PLAN_ANTEIL = anteil; PLAN_PROPHASE = proPhase;
+
+    offenePhasen.forEach(pp => {
+      const titel = (STATIONSTITEL[format] || STATIONSTITEL.lernwelt)[pp];
+      for(let k = 0; k < proPhase[pp]; k++){
+        nr++;
+        const t = titel[k % titel.length];
+        stationen.push({
+          nr, phase:pp, zugang:"", zugaenge: zugaengeFuer(),
+          name: t[0], thema: t[1], minuten:0,
+          verbind: verbindlichkeit(pp, k, wahl),
+          aufgaben: AUFGABENTYPEN,
+          methode: METHODEN[pp][k % METHODEN[pp].length],
+          sozial: SOZIALFORMEN[(nr-1) % SOZIALFORMEN.length],
+          material: medien.length ? medien[(nr-1) % medien.length] : "",
+          fundstelle: fundstelleFuer(nr, t[0]),
+          abgabe: medien.includes("OSS/Moodle") ? "OSS / Moodle" : "Lernwegeheft"
+        });
+      }
+    });
+  }
+
+  /* Minuten verteilen: Grundlast (Pflicht + Wahlpflicht) füllt 85 % der Stationszeit */
+  const grund = stationen.filter(s => s.verbind === "Pflicht" || s.verbind === "Wahlpflicht");
+  const zusatz = stationen.filter(s => s.verbind === "Wahl");
+  const zielGrund = Math.round(stationsMinuten * 0.85);
+  if(modus === "aufteilung"){
+    const je = Math.max(20, Math.round(zielGrund/Math.max(1,grund.length)/10)*10);
+    grund.forEach(s => s.minuten = je);
+  } else {
+    const gewicht = s => PLAN_ANTEIL[s.phase] / PLAN_PROPHASE[s.phase];
+    const gewichtSumme = grund.reduce((x,s)=>x+gewicht(s), 0) || 1;
+    grund.forEach(s => s.minuten = Math.max(20, Math.round(zielGrund*gewicht(s)/gewichtSumme/10)*10));
+  }
+  const schnitt = grund.length ? Math.round(grund.reduce((x,s)=>x+s.minuten,0)/grund.length/10)*10 : 40;
+  zusatz.forEach(s => s.minuten = schnitt);
+  if(bonusAn){
+    stationen.push({nr: ++nr, phase:"transfer", zugang:"", zugaenge: zugaengeFuer(),
+      name:"Bonus", thema:"Zusatzherausforderung für alle, die weiter sind",
+      minuten:0, verbind:"Bonus", aufgaben:"freie Wahl",
+      methode:"freie Wahl", sozial:"EA", material:"", fundstelle:"", abgabe:"freiwillig"});
+  }
+
+  verteileWege(stationen);
+
+  /* --- Stundenverlauf --- */
+  const stunden = [];
+  let sn = 0;
+  const nimm = () => "";
+  const echte = stationen.filter(s => s.verbind !== "Bonus");
+
+  const arbeitText = (k) => {
+    if(reihenfolge === "chrono"){
+      const frei = Math.min(echte.length, k+1);
+      return "Freigeschaltet: "+echte.slice(0,frei).map(s=>s.name).join(", ");
+    }
+    if(reihenfolge === "basis" && k <= 1) return "Alle starten an "+(echte[0] ? echte[0].name : "der Basisstation");
+    return "Alle Stationen offen – eigenes Tempo, eigene Reihenfolge";
+  };
+
+  /* Auftakt */
+  stunden.push({nr:++sn, datum:nimm(), art:"auftakt", fokus:"",
+    impuls: F.auftakt + ($("#rahmenfigur").value.trim() ? " · Rahmenfigur "+$("#rahmenfigur").value.trim()+" einführen" : ""),
+    experten:"—",
+    arbeit: reihenfolge === "chrono" ? "Erste Etappe öffnen" : "Erste Erkundung an allen Stationen",
+    reflexion:"Was willst du in dieser Reihe herausfinden? Mein Ziel."});
+
+  /* Wie viele Impulsplätze stehen zur Verfügung? Zwischenbilanzen kosten davon je einen. */
+  let bilanzdichte = parseInt($("#bilanzdichte").value,10);
+  let geplanteBilanz = bilanzdichte > 0 ? Math.floor(arbeitsStunden / (bilanzdichte + 1)) : 0;
+  if(arbeitsStunden - geplanteBilanz < echte.length){
+    /* Impulse gehen vor: Zwischenbilanzen erst streichen, dann Stationen bündeln */
+    geplanteBilanz = Math.max(0, arbeitsStunden - echte.length);
+    if(geplanteBilanz === 0) bilanzdichte = 0;
+  }
+  const plaetze = Math.max(1, arbeitsStunden - geplanteBilanz);
+
+  /* Fokusgruppen: normalerweise eine Station je Impuls, bei Zeitmangel zwei */
+  const proImpuls = Math.ceil(echte.length / plaetze);
+  const gruppen = [];
+  for(let g = 0; g < echte.length; g += proImpuls) gruppen.push(echte.slice(g, g + proImpuls));
+
+  let k = 0, seit = 0, rf = 0, gesetzteBilanz = 0;
+  for(let i = 0; i < arbeitsStunden; i++){
+    if(bilanzdichte > 0 && gesetzteBilanz < geplanteBilanz && seit >= bilanzdichte){
+      stunden.push({nr:++sn, datum:nimm(), art:"bilanz", fokus:"",
+        impuls: F.bilanz, experten: expertenAn ? "Alle bisher fertigen Stationen werden vorgestellt" : "—",
+        arbeit: arbeitText(Math.max(0,k-1)), reflexion:"Wo stehst du – und was fehlt dir noch?"});
+      seit = 0; gesetzteBilanz++; continue;
+    }
+    const gruppe = gruppen[k % gruppen.length] || [];
+    const runde = Math.floor(k / gruppen.length);
+    const namenTxt = gruppe.map(s => s.name).join(" und ");
+    const themaTxt = gruppe.length === 1 ? " – " + gruppe[0].thema : "";
+    stunden.push({nr:++sn, datum:nimm(), art:"impuls", fokus: namenTxt,
+      impuls: (runde === 0 ? "Fokus: " : "Vertiefender Fokus: ") + namenTxt + themaTxt
+        + " · alle übrigen Stationen mit einem Satz ansprechen",
+      experten: expertenAn && sn > 1
+        ? "Wer " + (namenTxt || "diese Station") + " schon bearbeitet hat, berät dort als Expertin oder Experte"
+        : "—",
+      arbeit: arbeitText(Math.min(echte.length-1, (k+1)*proImpuls-1)),
+      reflexion: REFLEXIONSFRAGEN[rf++ % REFLEXIONSFRAGEN.length]});
+    k++; seit++;
+  }
+
+  for(let b = 0; b < bilanzStd; b++){
+    stunden.push({nr:++sn, datum:nimm(), art:"abschluss", fokus:"",
+      impuls: b === 0 ? F.abschluss : "Mein Wachstum: Kompetenzraster und Reflexion",
+      experten:"—",
+      arbeit: b === 0 ? "Offene Stationen abschließen, Ergebnisse zusammentragen" : "Kompetenzraster und Reflexion",
+      reflexion:"Habe ich mein Ziel erreicht? Was nehme ich mit?"});
+  }
+
+  if(ln.vorb) stunden.push({nr:++sn, datum:nimm(), art:"ln", fokus:"",
+    impuls:"Vorbereitung auf den Leistungsnachweis – Schwerpunkte klären", experten:"—",
+    arbeit:"Gezieltes Üben nach eigenem Bedarf", reflexion:"Worin bist du sicher, worin noch nicht?"});
+  for(let d = 0; d < ln.durch; d++) stunden.push({nr:++sn, datum:nimm(), art:"ln", fokus:"",
+    impuls: ln.durch > 1 ? "Leistungsnachweis, Teil "+(d+1) : "Leistungsnachweis", experten:"—",
+    arbeit:"Durchführung", reflexion:"—"});
+  if(ln.rueck) stunden.push({nr:++sn, datum:nimm(), art:"ln", fokus:"",
+    impuls:"Rückgabe und Besprechung", experten:"—",
+    arbeit:"Individuelle Weiterarbeit an den Schwerpunkten", reflexion:"Was nimmst du dir für die nächste Reihe vor?"});
+
+  ZUSTAND.stationen = stationen;
+  ZUSTAND.stunden = stunden;
+  ZUSTAND.meta = sammleMeta(verteilung, ln, stationsMinuten, zr, reihenfolge);
+  return ZUSTAND;
+}
+
+function verbindlichkeit(pid, k, wahl){
+  if(pid === "erarbeiten1") return "Pflicht";
+  if(pid === "erarbeiten2") return (wahl === "hoch" && k > 0) ? "Wahlpflicht" : "Pflicht";
+  if(pid === "ueben")       return wahl === "gering" ? "Pflicht" : (k === 0 ? "Pflicht" : "Wahlpflicht");
+  if(pid === "transfer")    return wahl === "gering" ? "Pflicht" : "Wahl";
+  return "Pflicht";
+}
+
+function sammleMeta(verteilung, ln, stationsMinuten, zr, reihenfolge){
+  const f = $("#fach").value, F = FAECHER[f];
+  const sw = F.schwerpunkte.find(s => s.w === $("#schwerpunkt").value);
+  return {
+    fach:f, fachname:F.name, schwerpunkt:$("#schwerpunkt").value,
+    schwerpunktname: sw ? sw.t : "", farbe:F.farbe,
+    format:$("#format").value, formatname:FORMATE[$("#format").value].name,
+    einheit:FORMATE[$("#format").value].einheit, plural:FORMATE[$("#format").value].plural, karte:FORMATE[$("#format").value].karte,
+    reihenfolge, reihenfolgeText:{frei:"frei – alle Stationen von Anfang an offen",
+      basis:"Basis zuerst, danach frei", chrono:"chronologisch, gestaffelte Freischaltung"}[reihenfolge],
+    klasse:$("#klasse").value, lerngruppe:$("#lerngruppe").value.trim(),
+    thema:$("#thema").value.trim(), leitfrage:$("#leitfrage").value.trim(),
+    lernziel:$("#lernziel").value.trim(),
+    stunden:parseInt($("#stunden").value,10)||0, dauer:zr.dauer,
+    impulsmin:zr.impuls, reflexmin:zr.reflex, arbeitsmin:zr.arbeit, stationsMinuten,
+    rahmenfigur:$("#rahmenfigur").value.trim(), rahmenhandlung:$("#rahmenhandlung").value.trim(),
+    rahmenton:$("#rahmenton").selectedOptions[0].textContent,
+    rahmennamen:$$("#rahmennamen .chip.an").length > 0,
+    groesse:$("#groesse").value, hetero:$("#hetero").value,
+    lesen:$("#lesen").value, schreiben:$("#schreiben").value, daz:$("#daz").value,
+    niveau:$("#niveau").selectedOptions[0] ? $("#niveau").selectedOptions[0].textContent : "",
+    foerder:$("#foerder").value.trim(),
+    diffform:$$("#diffform .chip.an").map(c=>c.dataset.w), stufen:stufenText(),
+    experten:$("#experten").value === "ja", wahlanteil:$("#wahlanteil").value,
+    themenfeld:$("#themenfeld").value,
+    kompetenzen:$$("#kompetenzen .chip.an").map(c=>c.dataset.w),
+    aeioumodus: aeiouModus(),
+    aeioumodusText: aeiouModus() === "aufteilung"
+      ? "Stationsaufteilung – jede Station steht für einen Zugang (A, E, I, O, U)"
+      : aeiouModus() === "aus"
+      ? "kein AEIOU in dieser Reihe – Differenzierung ausschließlich über die anderen Kanäle"
+      : "Zugangswahl – JEDE Station führt alle fünf Zugänge zum selben Lernziel",
+    lnformate: lnFormate(), lnwahl:$("#lnwahl").value, lnzeitpunkt:$("#lnzeitpunkt").value,
+    klnanzahl:parseInt($("#klnanzahl").value,10)||0, klnformate: klnFormate(),
+    hand:$("#hand").value, handText:$("#hand").selectedOptions[0].textContent,
+    handwas:$("#handwas").value.trim(),
+    raster:$("#raster3").value.trim(),
+    leitperspektiven:$$("#leitperspektiven .chip.an").map(c=>c.dataset.w),
+    lnart:$("#lnart").selectedOptions[0].textContent, lnartWert:$("#lnart").value,
+    lntermin:$("#lntermin").value, lnblock:ln,
+    lehrwerk:$("#lehrwerk").value.trim(),
+    medien:$$("#medien .chip.an").map(c=>c.dataset.w),
+    notizen:$("#notizen").value.trim(),
+    bots:JSON.parse(JSON.stringify(BOTS)), quellen:JSON.parse(JSON.stringify(QUELLEN)),
+    verteilung
+  };
+}
+
+/* =========================================================
+   DARSTELLUNG
+   ========================================================= */
+const ARTNAME = {auftakt:"Auftakt", impuls:"Impulsstunde", bilanz:"Zwischenbilanz",
+                 abschluss:"Abschluss", ln:"Leistungsnachweis"};
+
+function zeichneKacheln(){
+  const m = ZUSTAND.meta;
+  $("#stationsuntertitel").textContent = ZUSTAND.stationen.length
+    ? "· " + ZUSTAND.stationen.length + " " + (m.plural||"Stationen") + ", " + (m.reihenfolgeText||"") : "";
+  $("#rahmenanzeige").innerHTML = m.rahmenfigur || m.rahmenhandlung
+    ? `<div class="rahmenbox"><b>Rahmenhandlung:</b> ${m.rahmenhandlung || m.rahmenfigur}${
+        m.rahmenfigur && m.rahmenhandlung ? " · Erzählfigur: "+m.rahmenfigur : ""}${
+        m.rahmennamen ? " · erzählerische Stationsnamen setzt Claude bei der Ausarbeitung" : ""}</div>`
+    : "";
+  $("#kacheln").innerHTML = ZUSTAND.stationen.map((s,i) => {
+    const p = PHASEN.find(x=>x.id===s.phase) || PHASEN[0];
+    return `<div class="kachel" style="border-top-color:${p.farbe}" data-i="${i}">
+      <div class="werkzeug nurbildschirm">
+        <button data-akt="hoch" title="nach vorn">↑</button>
+        <button data-akt="runter" title="nach hinten">↓</button>
+        <button data-akt="weg" title="löschen">×</button>
+      </div>
+      <h3 contenteditable data-f="name">${s.name}</h3>
+      <div class="thema" contenteditable data-f="thema">${s.thema}</div>
+      <div class="zeile">
+        <span class="marke ${s.verbind.toLowerCase()}" contenteditable data-f="verbind">${s.verbind}</span>
+        <span class="zeit" contenteditable data-f="minuten">${minText(s.minuten)}</span>
+      </div>
+      <div class="zeile"><span>${p.kurz}</span><span>${(s.zugaenge||[]).map(z=>`<span class="zugang" title="${AEIOU[z].name}: ${AEIOU[z].kurz}" style="background:${AEIOU[z].farbe}">${z}</span>`).join("")}</span></div>
+      <div class="zeile"><span contenteditable data-f="methode">${s.methode}</span><span contenteditable data-f="sozial">${s.sozial}</span></div>
+      <div class="zeile"><span style="font-size:10.5px">${s.aufgaben||""}</span></div>
+      <div class="zeile" style="gap:8px">
+        <span class="wegmarke" data-i="${i}" title="${(WEGE[s.weg]||WEGE.analog).kurz} — klicken zum Wechseln"
+          style="background:${(WEGE[s.weg]||WEGE.analog).farbe}">${(WEGE[s.weg]||WEGE.analog).name}</span></div>
+      <div class="fundzeile"><b>Fundstelle</b>
+        <span contenteditable data-f="fundstelle" class="${s.fundstelle?"":"leer"}"
+          data-platzhalter="z. B. Buch S. 13, Aufg. 4a">${s.fundstelle||""}</span></div>
+    </div>`;
+  }).join("");
+
+  $("#kacheln").querySelectorAll("[contenteditable]").forEach(el => {
+    el.addEventListener("blur", () => {
+      const i = +el.closest(".kachel").dataset.i, f = el.dataset.f, w = el.textContent.trim();
+      if(f === "minuten"){
+        const z = parseFloat(w.replace(",","."));
+        ZUSTAND.stationen[i].minuten = /std/i.test(w) ? Math.round(z*60) : (z || 0);
+        zeichneKacheln(); zeichneAuslastung();
+      } else if(f === "fundstelle"){
+        ZUSTAND.stationen[i].fundstelle = w; zeichneKacheln();
+      } else ZUSTAND.stationen[i][f] = w;
+    });
+  });
+  $("#kacheln").querySelectorAll(".wegmarke").forEach(el => el.addEventListener("click", () => {
+    const i = +el.dataset.i, s = ZUSTAND.stationen[i];
+    s.weg = WEG_REIHE[(WEG_REIHE.indexOf(s.weg) + 1) % WEG_REIHE.length];
+    zeichneKacheln(); zeichnePruefblick();
+  }));
+  $("#kacheln").querySelectorAll("[data-akt]").forEach(b => b.addEventListener("click", () => {
+    const i = +b.closest(".kachel").dataset.i, a = b.dataset.akt, s = ZUSTAND.stationen;
+    if(a === "weg") s.splice(i,1);
+    if(a === "hoch" && i > 0) [s[i-1], s[i]] = [s[i], s[i-1]];
+    if(a === "runter" && i < s.length-1) [s[i+1], s[i]] = [s[i], s[i+1]];
+    s.forEach((x,j) => x.nr = j+1);
+    zeichneKacheln(); zeichneAuslastung(); zeichnePruefblick();
+  }));
+}
+
+function zeichneAuslastung(){
+  const m = ZUSTAND.meta;
+  const verf = m.stationsMinuten || 1;
+  const pflicht = ZUSTAND.stationen.filter(s=>s.verbind==="Pflicht").reduce((a,s)=>a+s.minuten,0);
+  const wpf = ZUSTAND.stationen.filter(s=>s.verbind==="Wahlpflicht").reduce((a,s)=>a+s.minuten,0);
+  const grund = pflicht + wpf;
+  const puffer = Math.max(0, verf - grund);
+  const skala = Math.max(verf, grund);
+  const b = (w,f,t) => w > 0 ? `<span style="background:${f};flex:${w}">${w>=skala*.08?t:""}</span>` : "";
+  $("#auslastung").innerHTML =
+    b(pflicht,"#5B96E3","Pflicht "+pflicht+"′") +
+    b(wpf,"#8FA8E8","Wahlpflicht "+wpf+"′") +
+    b(puffer,"#DCE2F1","Puffer "+puffer+"′");
+  const angebot = ZUSTAND.stationen.filter(s=>s.verbind==="Wahl"||s.verbind==="Bonus").reduce((a,s)=>a+s.minuten,0);
+  $("#auslastungslegende").innerHTML =
+    `<div>Verfügbare Arbeitszeit an Stationen: <b>${verf} Minuten</b> (${m.arbeitsmin} Min je Stunde)</div>
+     <div>Grundlast für alle: <b>${grund} Minuten</b> = ${Math.round(grund/verf*100)} %</div>
+     <div>Zusätzliches Angebot: <b>${angebot} Minuten</b></div>`;
+  const q = grund/verf;
+  $("#zeitwarnung").innerHTML =
+    q > 1 ? `<div class="warnung rot">Die Pflichtanteile überschreiten die verfügbare Arbeitszeit um ${grund-verf} Minuten. ${
+      m.aeioumodus === "aufteilung"
+        ? "Fünf AEIOU-Stationen brauchen mehr Zeit, als diese Reihe hergibt – entweder Stundenzahl erhöhen oder auf Zugangswahl innerhalb der Stationen umstellen."
+        : "Stationen kürzen, auf Wahl umstellen oder Stunden ergänzen."}</div>`
+    : q > 0.95 ? `<div class="warnung">Sehr eng kalkuliert – nur ${verf-grund} Minuten Puffer für Langsamere, Störungen und Vertretung.</div>`
+    : q < 0.6 ? `<div class="warnung">Viel Luft: nur ${Math.round(q*100)} % der Arbeitszeit sind verplant. Entweder mehr Pflichtanteil oder die Reihe kürzen.</div>`
+    : `<div class="warnung gruen">Zeitlich stimmig: ${Math.round(q*100)} % Grundlast, ${verf-grund} Minuten Puffer.</div>`;
+}
+
+function zeichneRaster(){
+  const t = $("#raster");
+  t.innerHTML = `<thead><tr>
+    <th>Std</th><th>Termin</th><th>Art</th><th>Impuls</th><th>Experten</th><th>Arbeitsphase</th><th>Reflexion</th>
+    <th class="nurbildschirm"></th></tr></thead><tbody>` +
+    ZUSTAND.stunden.map((s,i) => `<tr data-i="${i}" class="${s.art!=="impuls"?"gemeinsam":""}">
+      <td class="nr">${s.nr}</td>
+      <td contenteditable data-f="datumText" class="termin">${s.datumText || ""}</td>
+      <td style="font-size:11.5px;font-weight:600;color:var(--text-leise)">${ARTNAME[s.art]}</td>
+      <td contenteditable data-f="impuls">${s.impuls}</td>
+      <td contenteditable data-f="experten">${s.experten}</td>
+      <td contenteditable data-f="arbeit">${s.arbeit}</td>
+      <td contenteditable data-f="reflexion">${s.reflexion}</td>
+      <td class="nurbildschirm"><div class="zeilenwerkzeug">
+        <button data-akt="hoch">↑</button><button data-akt="runter">↓</button><button data-akt="weg">×</button>
+      </div></td></tr>`).join("") + "</tbody>";
+
+  t.querySelectorAll("td[contenteditable]").forEach(td => td.addEventListener("blur", () => {
+    const i = +td.closest("tr").dataset.i;
+    if(td.dataset.f === "datumText") ZUSTAND.stunden[i].datumText = td.textContent.trim();
+    else ZUSTAND.stunden[i][td.dataset.f] = td.textContent.trim();
+  }));
+  t.querySelectorAll("[data-akt]").forEach(b => b.addEventListener("click", () => {
+    const i = +b.closest("tr").dataset.i, a = b.dataset.akt, s = ZUSTAND.stunden;
+    if(a === "weg") s.splice(i,1);
+    if(a === "hoch" && i > 0) [s[i-1], s[i]] = [s[i], s[i-1]];
+    if(a === "runter" && i < s.length-1) [s[i+1], s[i]] = [s[i], s[i+1]];
+    s.forEach((x,j) => x.nr = j+1);
+    zeichneRaster(); zeichnePruefblick();
+  }));
+}
+
+function zeichnePruefblick(){
+  const zaehler = {};
+  ZUSTAND.stationen.forEach(s => zaehler[s.phase] = (zaehler[s.phase]||0) + s.minuten);
+  $("#balken").innerHTML = PHASEN.filter(p=>zaehler[p.id]).map(p =>
+    `<span style="background:${p.farbe};flex:${zaehler[p.id]}">${zaehler[p.id]}′</span>`).join("");
+  $("#legende").innerHTML = PHASEN.filter(p=>zaehler[p.id]).map(p =>
+    `<div><i style="background:${p.farbe}"></i>${p.name} · ${zaehler[p.id]} Min</div>`).join("");
+
+  const aus = (ZUSTAND.meta.aeioumodus === "aus");
+  const da = new Set();
+  ZUSTAND.stationen.forEach(s => (s.zugaenge||[]).forEach(z => da.add(z)));
+  const namen = {}; AEIOU_REIHE.forEach(k => namen[k] = AEIOU[k].name);
+  $("#aeiou-raster").innerHTML = AEIOU_REIHE.map(k =>
+    `<div class="${da.has(k)?"da":""}" title="${AEIOU[k].kurz}"><b>${k}</b>${namen[k]}</div>`).join("");
+  /* Bei Zugangswahl muss JEDE Station alle fünf tragen, nicht nur die Reihe insgesamt */
+  const luecken = aus ? [] : ZUSTAND.stationen
+    .filter(s => s.verbind !== "Bonus")
+    .filter(s => AEIOU_REIHE.some(k => !(s.zugaenge||[]).includes(k)));
+  const fehlt = aus ? [] : AEIOU_REIHE.filter(k => !da.has(k));
+  const impulse = ZUSTAND.stunden.filter(s=>s.art==="impuls").length;
+  const ohneImpuls = ZUSTAND.stationen.filter(s=>s.verbind!=="Bonus")
+    .filter(s => !ZUSTAND.stunden.some(h => h.fokus === s.name)).map(s=>s.name);
+  /* Kopf, Herz und Hand: die Mischung gilt für die REIHE, nicht für jede Station */
+  const wa = wegAnteile();
+  $("#mischung").innerHTML = WEG_REIHE.map(w =>
+    wa[w].minuten > 0
+      ? `<span style="background:${WEGE[w].farbe};flex:${wa[w].minuten}">${wa[w].anteil >= 12 ? WEGE[w].name+" "+wa[w].anteil+" %" : ""}</span>`
+      : "").join("") || `<span style="background:var(--grau);flex:1">noch keine Zeiten verteilt</span>`;
+  const fehlend = WEG_REIHE.filter(w => wa[w].anzahl === 0);
+  const duenn = WEG_REIHE.filter(w => wa[w].anzahl > 0 && wa[w].anteil < 15);
+  $("#mischungshinweis").innerHTML =
+    fehlend.length
+      ? `<div class="warnung rot">Kein Platz für <b>${fehlend.map(w=>WEGE[w].name).join(" und ")}</b>. Die Kinder sollen in der Reihe alle drei Wege gehen &ndash; ${
+          fehlend.includes("handelnd") ? "etwas bauen, gestalten oder spielen" : fehlend.includes("analog") ? "auch am Buch, am Atlas oder auf Papier arbeiten" : "auch digital arbeiten"
+        }. Weg einer Station anklicken zum Ändern.</div>`
+      : duenn.length
+      ? `<div class="warnung">Sehr dünn vertreten: <b>${duenn.map(w=>WEGE[w].name+" ("+wa[w].anteil+" %)").join(", ")}</b>. Eine gesunde Mischung braucht von jedem Weg spürbar mehr.</div>`
+      : `<div class="warnung gruen">Gute Mischung: ${WEG_REIHE.map(w=>WEGE[w].name+" "+wa[w].anteil+" %").join(" · ")}. Nicht jede Station trägt alle drei &ndash; die Reihe tut es.</div>`;
+
+  $("#phasenhinweis").innerHTML =
+    (aus
+      ? `<div class="warnung gruen">AEIOU ist für diese Reihe ausgeschaltet. Differenziert wird über Aufgabenstufen, Sozialform, Besprechungs- und Beratertisch sowie die Medienformate.</div>`
+      : ZUSTAND.meta.aeioumodus === "aufteilung"
+      ? (fehlt.length
+        ? `<div class="warnung">Es fehlen Stationen für: <b>${fehlt.map(k=>k+" · "+namen[k]).join(", ")}</b>. Beim Lerndorf-Prinzip braucht jeder Zugang seine eigene Station.</div>`
+        : `<div class="warnung gruen">Alle fünf Zugänge haben eine eigene Station – das Lerndorf ist vollständig.</div>`)
+      : luecken.length
+        ? `<div class="warnung">Diese ${ZUSTAND.meta.einheit||"Station"}en führen nicht alle fünf Zugänge: <b>${luecken.map(s=>s.name).join(", ")}</b>. Bei Zugangswahl gehören in jede Station alle fünf Wege zum selben Lernziel.</div>`
+        : `<div class="warnung gruen">Jede ${ZUSTAND.meta.einheit||"Station"} führt alle fünf Zugänge – jedes Kind kann überall auf seinem Weg arbeiten.</div>`)
+    + (ohneImpuls.length
+      ? `<div class="warnung">Ohne eigenen Impuls im Stundenverlauf: <b>${ohneImpuls.join(", ")}</b>. Entweder eine Impulsstunde ergänzen oder die Station in einem anderen Impuls mitansprechen.</div>`
+      : `<div class="warnung gruen">Jede Station bekommt mindestens einmal den Stundenimpuls (${impulse} Impulsstunden).</div>`);
+}
+
+function zeichneRahmen(){
+  const m = ZUSTAND.meta;
+  const gesamtStd = ZUSTAND.stunden.length;
+  $("#druck-titel").textContent = "Reihenplanung: " + (m.thema || "ohne Titel");
+  $("#druck-zeile").textContent =
+    `${m.fachname}${m.schwerpunktname && m.fach!=="frei" ? " · "+m.schwerpunktname : ""} · Klasse ${m.klasse}${m.lerngruppe ? " ("+m.lerngruppe+")" : ""} · ${m.formatname} · ${gesamtStd} Stunden à ${m.dauer} Minuten` +
+    " · K. Schmitt";
+  $("#topbadge").textContent = m.thema ? m.thema + " · Kl. " + m.klasse : "Neue Reihe";
+  const z = (k,v) => `<tr><td style="width:210px;font-weight:600;color:var(--text-leise)">${k}</td><td>${v}</td></tr>`;
+  $("#rahmen").innerHTML = `<table class="raster"><tbody>
+    ${z("Fach", m.fachname + (m.schwerpunktname && m.fach!=="frei" ? " · "+m.schwerpunktname : ""))}
+    ${z("Klassenstufe", "Klasse "+m.klasse+(m.lerngruppe ? " – "+m.lerngruppe : ""))}
+    ${z("Themenfeld", m.themenfeld || "–")}
+    ${z("Leitfrage", m.leitfrage || "–")}
+    ${z("Lernziel", m.lernziel || "–")}
+    ${z("Arbeitsform", m.formatname + " · " + m.reihenfolgeText + " · " + m.karte)}
+    ${m.rahmenhandlung || m.rahmenfigur ? z("Rahmenhandlung", (m.rahmenhandlung||m.rahmenfigur)+(m.rahmenfigur&&m.rahmenhandlung?" · Erzählfigur "+m.rahmenfigur:"")) : ""}
+    ${z("Stundenrhythmus", `${m.impulsmin} Min Impuls · ${m.arbeitsmin} Min Arbeitsphase · ${m.reflexmin} Min Reflexion`)}
+    ${z("Kompetenzbereiche", m.kompetenzen.join(" · ") || "–")}
+    ${z("Leitperspektiven", m.leitperspektiven.join(" · ") || "–")}
+    ${z("Umfang", gesamtStd+" Stunden à 70 Minuten")}
+    ${z("Lerngruppe", `${m.groesse} Lernende · Heterogenität ${m.hetero} · Lesen ${m.lesen} · Schreiben ${m.schreiben}${m.foerder ? " · "+m.foerder : ""}`)}
+    ${z("Anspruchsebene", m.niveau)}
+    ${z("Differenzierung", m.stufen + (m.diffform.length ? " · "+m.diffform.join(", ") : ""))}
+    ${m.bots.length ? z("Lernbegleiter", m.bots.map(b=>b.name+(b.rolle?" ("+b.rolle+")":"")).join(" · ")) : ""}
+    ${z("Leistungsnachweis", m.lnart + (m.lntermin ? " in Stunde "+m.lntermin : ""))}
+    ${z("Analog · digital · handelnd", WEG_REIHE.map(w=>WEGE[w].name+" "+wegAnteile()[w].anteil+" %").join(" · "))}
+    ${z("Material", [m.lehrwerk, m.medien.join(", ")].filter(Boolean).join(" · ") || "–")}
+    ${m.quellen.length ? z("Materialquellen", m.quellen.map(q=>q.titel+(q.zu?" ("+q.zu+")":"")).join(" · ")) : ""}
+    ${m.notizen ? z("Hinweise", m.notizen) : ""}
+  </tbody></table>`;
+}
+
+function zeichneAlles(){ zeichneKacheln(); zeichneAuslastung(); zeichneRaster(); zeichnePruefblick(); zeichneRahmen(); }
+
+function rechneVorschau(){
+  const gesamt = parseInt($("#stunden").value,10) || 0;
+  const ln = lnStunden(), zr = zeitrahmen();
+  const netto = Math.max(0, gesamt - ln.gesamt);
+  const arbeitsMin = Math.round(zr.arbeit * Math.max(0, netto - 1.5));
+  $("#rechenbox").innerHTML = `
+    <div><strong>${gesamt}</strong>Stunden gesamt</div>
+    <div><strong>${netto}</strong>für die Lernumgebung</div>
+    <div><strong>${ln.gesamt}</strong>für den Leistungsnachweis</div>
+    <div><strong>${arbeitsMin}</strong>Minuten Arbeitszeit an Stationen</div>
+    <div><strong>${zr.arbeit}</strong>Minuten Arbeitsphase je Stunde</div>`;
+
+  let w = "";
+  if(gesamt && ln.gesamt >= gesamt)
+    w += `<div class="warnung rot">Der Leistungsnachweis belegt das gesamte Kontingent.</div>`;
+  if(zr.arbeit < 20)
+    w += `<div class="warnung">Nur ${zr.arbeit} Minuten Arbeitsphase je Stunde – für offenes Arbeiten sehr knapp.</div>`;
+  $("#terminwarnung").innerHTML = w;
+
+  const n = differenzierungsstufen();
+  $("#diffhinweis").innerHTML = `<div class="warnung ${n===5?"":"gruen"}">Empfohlen: <b>${stufenText()}</b>. ${
+    n===5 ? "Drei Stufen nach unten, zwei nach oben. Alle Lernenden erhalten dieselbe Informationsbasis."
+          : "Drei Stufen genügen. Die Informationsbasis bleibt für alle identisch."}</div>`;
+
+  /* AEIOU-Modus erklären, Lerndorf zieht die Aufteilung nach sich */
+  const modus = $("#aeioumodus").value;
+  $("#aeiouhinweis").innerHTML = modus === "aufteilung"
+    ? "Fünf Stationen, jede steht für einen Zugang: A Analysieren · E Erforschen · I Imaginieren · O Ordnen · U Urteilen. Die Stundenzahl bestimmt nur die Zeit je Station, nicht deren Anzahl."
+    : modus === "aus"
+    ? "AEIOU ist ausgeschaltet. Die Differenzierung läuft über Aufgabenstufen, Sozialform, Besprechungs- und Beratertisch sowie die Medienformate."
+    : "Jede Station führt ALLE fünf Zugänge – zu jeder Station gehören fünf Arbeitswege zum selben Lernziel. Die Kinder wählen. Die Stationen unterscheiden sich im Verlauf (Grundlagen, Vertiefen, Üben, Transfer), nicht im Zugangsangebot.";
+
+  /* Leistungsnachweis: Felder je nach Art ein- und ausblenden */
+  const lnart = $("#lnart").value;
+  $("#feld-lnformate").style.display = lnart === "keiner" ? "none" : "";
+  $("#feld-lnzeit").style.display    = lnart === "alternativ" ? "" : "none";
+  $("#lnwahl").closest(".feld").style.display = lnart === "alternativ" ? "" : "none";
+  $("#lntermin").closest(".feld").style.display =
+    (lnart === "keiner" || (lnart === "alternativ" && $("#lnzeitpunkt").value === "frei")) ? "none" : "";
+  if(lnart === "schriftlich" && !$$("#lnformate .chip.an").length){
+    const k = $$("#lnformate .chip").find(c => c.dataset.w === "Klassenarbeit");
+    if(k) k.classList.add("an");
+  }
+
+  const F = FORMATE[$("#format").value];
+  const rf = $("#reihenfolge").value;
+  $("#formathinweis").innerHTML =
+    `<div class="warnung gruen"><b>${F.name}:</b> ${F.beschreibung} Jede Stunde: ${zr.impuls} Min Impuls mit einem Fokus, ${zr.arbeit} Min offene Arbeit an allen ${F.plural}, ${zr.reflex} Min Reflexion.</div>`
+    + (rf ? "" : `<div class="warnung">Die Reihenfolge der Stationen ist noch nicht festgelegt – bitte für diese Reihe entscheiden.</div>`);
+}
+
+/* =========================================================
+   AUFTRAG FÜR CLAUDE
+   ========================================================= */
+function baueAuftrag(){
+  const m = ZUSTAND.meta;
+  if(!ZUSTAND.stationen.length) return "Zuerst einen Reihenplan erzeugen.";
+  const lehrplanGenau = $("#opt-lehrplan").checked;
+  const material = $("#opt-material").checked;
+  const lernwelt = $("#opt-lernwelt").checked;
+
+  const stationen = ZUSTAND.stationen.map(s => {
+    const p = PHASEN.find(x=>x.id===s.phase);
+    const zg = (s.zugaenge||[]).length ? (s.zugaenge||[]).join("/") : "—";
+    return `  ${String(s.nr).padStart(2," ")} | ${s.name.padEnd(24," ")} | ${String(s.minuten||"offen").padStart(5," ")} Min | ${s.verbind.padEnd(11," ")} | ${p.kurz.padEnd(14," ")} | AEIOU: ${zg.padEnd(9," ")} | Weg: ${(s.weg||"analog").padEnd(9," ")} | ${s.methode} · ${s.sozial} · Abgabe: ${s.abgabe}\n       ${s.thema}\n       Material: ${s.fundstelle || "offen – bitte Vorschlag"}`;
+  }).join("\n");
+
+  const stunden = ZUSTAND.stunden.map(s =>
+    `  ${String(s.nr).padStart(2," ")} | ${(s.datumText || "—").padEnd(13," ")} | ${ARTNAME[s.art].padEnd(18," ")} | ${s.impuls}\n       Experten: ${s.experten}\n       Arbeit:   ${s.arbeit}\n       Reflexion: ${s.reflexion}`).join("\n");
+
+  const bots = m.bots.length
+    ? m.bots.map(b => `  ${b.name}${b.rolle ? " – "+b.rolle : ""}${b.link ? "  ["+b.link+"]" : ""}`).join("\n")
+    : "  keine";
+  const quellen = m.quellen.length
+    ? m.quellen.map(q => {
+        const teile = [];
+        if(q.fund) teile.push("Fundstelle: "+q.fund);
+        if(q.datei) teile.push("Datei: "+q.datei+(q.groesse ? " ("+q.groesse+")" : "")+" – hänge ich im Chat an");
+        if(q.link) teile.push("Link (für dich NICHT abrufbar, nur mein Merkposten): "+q.link);
+        if(!teile.length) teile.push("keine Fundstelle hinterlegt – Material bitte selbst vorschlagen und als Vorschlag kennzeichnen");
+        return `  ${q.titel}${q.art ? "  ["+q.art+"]" : ""}${q.zu ? "  (gehört zu: "+q.zu+")" : ""}\n      ${teile.join("\n      ")}`;
+      }).join("\n")
+    : "  kein Material hinterlegt – bitte eigenes vorschlagen und als Vorschlag kennzeichnen";
+
+  /* Zuordnung Station → Material, damit nichts pauschal bleibt */
+  const zuordnung = ZUSTAND.stationen.map(s =>
+    `  ${(m.einheit||"Station")} ${s.nr} · ${s.name.padEnd(24," ")} = ${
+      s.fundstelle ? s.fundstelle
+      : s.verbind === "Bonus" ? "freie Wahl – hier darfst du selbst etwas vorschlagen"
+      : "OFFEN – bitte Material vorschlagen und als VORSCHLAG kennzeichnen"}`).join("\n");
+
+  /* Welche Dateien muss Krystina im Chat anhängen? */
+  const anzuhaengen = m.quellen.filter(q => q.datei);
+  const anhaengeBlock = anzuhaengen.length
+    ? anzuhaengen.map(q => `  ☐ ${q.datei}${q.groesse ? "  ("+q.groesse+")" : ""}${q.zu ? "  → "+q.zu : ""}`).join("\n")
+    : "  keine – ich habe zu dieser Reihe keine Dateien hinterlegt";
+
+  const OP = operatorenFuer(m.fach);
+  const SP = sprachprofil(m.klasse);
+  const WA = wegAnteile();
+  const wegeBlock = WEG_REIHE.map(w => {
+    const namen = ZUSTAND.stationen.filter(x => x.weg === w && x.verbind !== "Bonus").map(x => x.name);
+    const wort = WA[w].anzahl === 1 ? (m.einheit || "Station") : (m.plural || "Stationen");
+    return `  ${WEGE[w].name.padEnd(10," ")} ${String(WA[w].anzahl).padStart(2," ")} ${wort} · ${String(WA[w].minuten).padStart(4," ")} Min · ${String(WA[w].anteil).padStart(3," ")} %   (${WEGE[w].kurz})\n` +
+           `             ${namen.join(", ") || "—"}`;
+  }).join("\n");
+  const operatorenBlock =
+    `AFB I – Reproduktion (Einstieg jeder Station, Input und Basisaufgabe)\n` +
+    OP.I.map(o=>"  · "+o).join("\n") +
+    `\nAFB II – Reorganisation und Anwendung (Kern der Basisaufgabe, Blütenaufgabe)\n` +
+    OP.II.map(o=>"  · "+o).join("\n") +
+    `\nAFB III – Reflexion und Urteil (Blütenaufgabe, Transfer, Bilanz)\n` +
+    OP.III.map(o=>"  · "+o).join("\n");
+
+  const zusatz = [];
+  if(lehrplanGenau) zusatz.push("Ich brauche die Kompetenzformulierungen wörtlich aus dem Lehrplan. Nenne mir zuerst in einem Satz, welches PDF du dafür brauchst – ich lade es dann hier hoch. Erst danach ausarbeiten.");
+  if(material) zusatz.push("Wo in der Zuordnungstabelle OFFEN steht, schlägst du konkretes Material vor: Textstelle mit Autor und Titel, Quelle, Film oder Onlinematerial – immer mit einer Fundstelle, die ich nachschlagen kann, und mit VORSCHLAG gekennzeichnet.");
+  if(lernwelt) zusatz.push("Baue anschließend die passende digitale Lernwelt nach dem Skill lernwelt-bauen, mit genau diesen Stationen.");
+
+  return `Ich bin Krystina Schmitt, Lehrerin für Deutsch und Gesellschaftswissenschaften an einer Gemeinschaftsschule im Saarland. Ich unterrichte in offenen Lernumgebungen, nicht in einzelnen Stunden mit je einem Thema. Erstelle mir aus den folgenden Angaben eine ausgearbeitete Reihenplanung als einzelne HTML-Datei mit Druckfunktion.
+
+═══ SO ARBEITE ICH ═══
+Die ${m.plural} laufen PARALLEL. Die Kinder arbeiten im eigenen Tempo und meist an
+unterschiedlichen Themen gleichzeitig. Jede Unterrichtsstunde folgt demselben Rhythmus:
+  ${m.impulsmin} Min Impuls  →  ${m.arbeitsmin} Min offene Arbeitsphase  →  ${m.reflexmin} Min Reflexion
+Der Impuls setzt den Fokus auf genau eine davon und spricht die übrigen kurz mit an.
+${m.experten ? `Wer die Aufgaben der Fokus-Station schon bearbeitet hat, wird dort Expertin
+oder Experte und berät die anderen; alle übrigen bekommen den Impuls zum Weiterarbeiten.` : "Eine Expertenrolle ist in dieser Reihe nicht vorgesehen."}
+Reihenfolge: ${m.reihenfolgeText}.
+
+${m.aeioumodus === "aus"
+? `AEIOU ist in dieser Reihe NICHT vorgesehen. Verwende die Buchstaben A, E, I, O, U nirgends.
+Differenziert wird ausschließlich über die unten genannten Kanäle.`
+: `AEIOU ist bei mir ein PRINZIP DER DIFFERENZIERUNG, kein Schwerpunkt: fünf Kompetenzzugänge
+zum SELBEN Lernziel – A Analysieren, E Erforschen und Erkunden, I Imaginieren, O Ordnen,
+U Urteilen. Achtung: A steht für Analysieren, nicht für Argumentieren.
+${m.aeioumodus === "aufteilung"
+  ? "In dieser Reihe teilen die Zugänge die Stationen auf: jede Station steht für einen Zugang.\nDie Kinder durchlaufen sie und erreichen über verschiedene Wege dasselbe Ziel."
+  : `In dieser Reihe stehen die Zugänge INNERHALB jeder Station zur Wahl – und zwar ALLE FÜNF
+in JEDER Station. Das ist keine Empfehlung, sondern die Bedingung: Zu jeder Station
+gehören genau fünf Arbeitswege, A, E, I, O und U, die alle zum selben Lernziel führen.
+Keine Station darf einen Zugang auslassen, auch nicht die Übungs- oder Bilanzstationen.
+Wenn ein Zugang schwer zu füllen scheint, ist das ein Zeichen dafür, die Aufgabe anders
+zuzuschneiden – nicht dafür, ihn wegzulassen.`}`}
+Innerhalb jeder Station gilt die Aufgabensystematik: Input · Basisaufgabe · Blütenaufgabe · Digitalaufgabe.
+
+═══ RAHMENDATEN ═══
+Fach:                 ${m.fachname}${m.schwerpunktname && m.fach!=="frei" ? "\nSchwerpunkt:          "+m.schwerpunktname : ""}
+Klassenstufe:         ${m.klasse}${m.lerngruppe ? "  (Lerngruppe "+m.lerngruppe+")" : ""}
+Thema:                ${m.thema || "—"}
+Leitfrage:            ${m.leitfrage || "— (bitte selbst formulieren: offen, lebensweltlich, provokativ)"}
+Lernziel:             ${m.lernziel || "— (bitte aus Themenfeld und Kompetenzen ableiten)"}
+Lernumgebung:         ${m.formatname} · ${m.karte}
+Umfang:               ${m.stunden} Stunden à 70 Minuten
+Arbeitszeit gesamt:   ${m.stationsMinuten} Minuten an den ${m.einheit}en
+Themenfeld Lehrplan:  ${m.themenfeld || "—"}
+Kompetenzbereiche:    ${m.kompetenzen.join(" · ") || "—"}
+Leitperspektiven:     ${m.leitperspektiven.join(" · ") || "—"}
+AEIOU-Umsetzung:      ${m.aeioumodusText}
+${m.rahmenfigur || m.rahmenhandlung ? `
+═══ NARRATIVER RAHMEN ═══
+Erzählfigur:          ${m.rahmenfigur || "—"}
+Rahmenhandlung:       ${m.rahmenhandlung || "—"}
+Ton:                  ${m.rahmenton}
+${m.rahmennamen ? `Die ${m.einheit}en tragen unten sachliche Arbeitstitel. Ersetze sie durch erzählerische
+Namen, die zum Rahmen und zum Thema passen, und lass die Erzählfigur in jedem Impuls
+mit ein bis zwei Sätzen auftreten. Der Rahmen trägt, er schmückt nicht nur.` : "Die Arbeitstitel der Stationen bleiben sachlich."}` : ""}
+═══ LERNGRUPPE ═══
+Größe:                ${m.groesse} Lernende
+Heterogenität:        ${m.hetero}
+Lesekompetenz:        ${m.lesen}    Schreibkompetenz: ${m.schreiben}
+Sprachschwache/DaZ:   ${m.daz}
+Anspruchsebene:       ${m.niveau}${m.foerder ? "\nFörderbedarfe:        "+m.foerder : ""}
+Differenzierung:      ${m.stufen}${m.diffform.length ? "\nFormen:               "+m.diffform.join(", ") : ""}
+
+═══ LERNBEGLEITER (Chatbots) ═══
+${bots}
+
+═══ LEISTUNGSNACHWEISE ═══
+Großer Leistungsnachweis (GLN)
+  Art:                ${m.lnart}
+  Zeitpunkt:          ${m.lnartWert === "keiner" ? "—" : (m.lnzeitpunkt === "frei"
+      ? "frei innerhalb der Reihe, nach enger Absprache mit mir – die Erbringung läuft in der Arbeitsphase mit"
+      : "fester Termin für alle" + (m.lntermin ? " in Stunde "+m.lntermin : ""))}
+  Formate:            ${m.lnformate.length ? m.lnformate.join(" · ") : (m.lnartWert === "schriftlich" ? "Klassenarbeit" : "— bitte passende vorschlagen")}
+  Formatwahl:         ${m.lnwahl === "ja" ? "die Kinder wählen aus den angebotenen Formaten" : "ein Format für alle"}
+  Stundenanteil:      ${m.lnblock.vorb} Vorbereitung · ${m.lnblock.durch} Durchführung bzw. Vorstellung · ${m.lnblock.rueck} Rückmeldung
+
+Kleine Leistungsnachweise (KLN)
+  Anzahl:             ${m.klnanzahl} in dieser Reihe
+  Formate:            ${m.klnformate.length ? m.klnformate.join(" · ") : "— bitte vorschlagen"}
+  Sie laufen im offenen Arbeiten mit und kosten keine eigenen Stunden.
+
+Kopf, Herz und Hand (nach Maria Montessori)
+  ${m.hand === "ja" ? "Ein handlungsorientierter Anteil ist verbindlich und wird bewertet."
+    : m.hand === "angebot" ? "Ein handlungsorientierter Anteil wird angeboten, aber nicht bewertet."
+    : "Kein eigener handlungsorientierter Anteil vorgesehen."}${m.handwas ? "\n  Konkret:            "+m.handwas : ""}
+
+Kompetenzraster „Mein Wachstum"
+${m.raster ? m.raster.split("\n").filter(z=>z.trim()).map(z=>"  · "+z.trim()).join("\n") : "  noch offen – bitte drei bis fünf Kompetenzen aus dem Lernziel ableiten, in Ich-Form"}
+
+═══ MATERIAL ═══
+Lehrwerk:             ${m.lehrwerk || "—"}
+Verfügbare Medien:    ${m.medien.join(", ") || "—"}${m.notizen ? "\nBesondere Hinweise:   "+m.notizen : ""}
+
+═══ MATERIALQUELLEN ═══
+${quellen}
+
+═══ DIESE DATEIEN HÄNGE ICH AN ═══
+${anhaengeBlock}
+${anzuhaengen.length ? `Sieh die Dateien durch und wähle SELBST aus, welche Seiten zu welcher Station passen.
+Bei einer PDF mit vielen Seiten nimmst du nur die, die wirklich gebraucht werden – nicht alles.
+Zeig mir vor dem Einbauen kurz in einer Zeile je Station, welche Seite du gewählt hast.
+Was nicht passt, lässt du weg und sagst mir in einem Satz, warum.` : `Ohne Dateien schlägst du Material vor und kennzeichnest es als VORSCHLAG.`}
+
+═══ ZUORDNUNG: MATERIAL JE ${(m.einheit||"Station").toUpperCase()} ═══
+${zuordnung}
+Diese Zuordnung ist verbindlich. Nenne in JEDER ausgearbeiteten Station die Fundstelle
+wörtlich im Arbeitsauftrag, so wie ein Kind sie liest: „Schlag im Buch Seite 13 auf und
+bearbeite Aufgabe 4a." Nicht „siehe Material", nicht „nutze geeignete Quellen".
+Steht dort OFFEN, schlägst du selbst etwas vor und schreibst VORSCHLAG davor – ich prüfe das.
+Wenn ich zu einem Link keine Fundstelle angegeben habe, tu NICHT so, als kenntest du den Inhalt.
+Cloud-Links (OneDrive, SharePoint, Drive) kannst du nicht öffnen: Sie sind mein Merkposten.
+Brauchst du den Inhalt, sag mir in EINEM Satz, welche Datei ich hochladen soll.
+
+═══ OPERATOREN – so werden Aufgaben formuliert (${m.fachname}) ═══
+Jede Aufgabenstellung beginnt mit einem Operator aus dieser Liste, nie mit einer Umschreibung.
+Kein „Beschäftige dich mit", kein „Setze dich auseinander" außerhalb der Liste, kein „Vertiefe".
+Der Operator steht im Klartext in der Aufgabe. Unsichtbar bleibt nur die AFB-Zuordnung.
+Beim ersten Auftreten in dieser Reihe erklärt ein Kasten den Operator in EINEM Satz.
+${operatorenBlock}
+
+═══ KOPF, HERZ UND HAND – analog, digital, handelnd ═══
+Meine Kinder sollen in dieser Reihe alle drei Wege gehen. Aber NICHT jede Station trägt
+alle drei – das würde jede Station überladen. Die MISCHUNG gilt für die ganze Reihe.
+So ist sie geplant:
+
+${wegeBlock}
+
+Was die Wege bedeuten:
+  analog    am Buch, am Atlas, am Text, an der Karte, mit Karteikarten, im Heft
+  digital   in der Lernwelt, Recherche, Quiz, Video, Podcast hören, Abgabe über OSS
+  handelnd  bauen, gestalten, spielen, befragen, darstellen – etwas entsteht oder passiert
+
+Der Weg entscheidet über die Aufgabenform, nicht umgekehrt:
+• Kartenarbeit lohnt sich analog am Atlas – nicht als Bildschirmkarte.
+• Ein Raum, ein Bauwerk, eine Landschaft wird begriffen, wenn man sie baut
+  (Nildelta im Schuhkarton, Stadtmodell, Zeitleiste quer durchs Klassenzimmer).
+• Digital trägt dort, wo Rückmeldung sofort kommt, wo recherchiert oder produziert wird
+  oder wo eine Karte begehbar sein soll.
+• Handelnd heißt nicht „male ein Bild dazu". Es heißt: Es entsteht ein Gegenstand,
+  eine Aufführung, ein Gespräch, ein Spiel – mit Kriterien, an denen man es messen kann.
+Weicht dein Vorschlag von der Planung oben ab, weil es didaktisch besser passt: ändere ihn
+und schreib mir in einem Satz, warum.
+
+═══ AUFGABENFORMEN – ein Vorrat, keine Schablone ═══
+Eine Aufgabe ist NICHT immer ein Hauptauftrag mit drei Unterpunkten. Diese Form ist eine
+von acht und passt längst nicht überall. Wähle die Form nach der Sache, nicht aus Gewohnheit.
+
+${AUFGABENFORMEN.map(f => `  ${f[0].padEnd(16," ")} ${f[1]}\n  ${" ".repeat(16)} passt bei: ${f[2]}\n  ${" ".repeat(16)} Beispiel: ${f[3]}`).join("\n\n")}
+
+Regeln für die Wahl:
+• Zwei Stationen hintereinander bekommen nie dieselbe Form.
+• In einer Reihe kommen mindestens vier verschiedene Formen vor.
+• Der Mehrschritt-Auftrag steht höchstens in der Hälfte der Stationen.
+• Handelnde Aufgaben bekommen einen Produktauftrag mit Kriterienliste, keine Teilschritte:
+  Die Kriterien sagen, was am Ende dasteht – den Weg dorthin findet das Kind selbst.
+• Bei Teilschritten: drei bis fünf, steigend im Anspruch, jeder in einem Zug erledigbar.
+
+Für jede Form gilt:
+• Genau ein Operator je Auftrag oder Teilschritt, aus dem Katalog des Fachs.
+• Der Auftrag nennt Material und Fundstelle wörtlich.
+• Es steht dabei, wohin das Ergebnis kommt (Merkheft, Lernwegeheft, Padlet, OSS).
+• Kein Auftrag setzt einen Text voraus, der nicht genannt ist.
+• Aktiv, Du-Form, kein Fließtextauftrag ohne Operator.
+
+═══ SPRACHNIVEAU KLASSE ${m.klasse} – Zahlen, keine Absichtserklärungen ═══
+Die Kinder haben zuletzt Formulierungen bekommen, die sie nicht verstanden haben.
+Das sind die Grenzen für diese Klassenstufe:
+  Satzlänge:   ${SP.satz}
+  Satzbau:     ${SP.bau}
+  Wortwahl:    ${SP.wort}
+  Fachwörter:  ${SP.fach}
+  Sprachstand der Lerngruppe: ${m.daz === "viele" ? "A2 konsequent" : m.daz === "einige" ? "A2 bis B1" : "B1 bis B2"}
+
+Operatoren: alle dürfen vorkommen – sie sind die Operationalisierung und stehen später in
+der Prüfung. Aber was in dieser Stufe neu ist, wird erklärt:
+  vertraut:            ${SP.vertraut}
+  erklärungsbedürftig: ${SP.erklaeren}
+Ein erklärungsbedürftiger Operator bekommt beim ersten Auftreten in dieser Reihe einen
+kleinen Kasten mit EINEM Satz, im Sprachniveau dieser Klasse:
+  Vergleichen heißt: Zeige, was gleich ist – und was verschieden ist.
+Anforderungsbereiche und Kürzel wie AFB II erscheinen nirgends im Schülermaterial.
+
+Diese Wörter kommen in Schüleraufgaben NICHT vor. Rechts steht, was stattdessen dasteht:
+${SPERRLISTE.map(w => "  " + w[0].padEnd(34," ") + "→  " + w[1]).join("\n")}
+
+Prüfe deinen eigenen Text, bevor du ihn ausgibst: Jeder Satz über der Grenze wird geteilt.
+Lies eine Aufgabe laut – stolperst du, stolpert das Kind auch.
+
+═══ LEHRPLÄNE – BITTE NICHT ONLINE SUCHEN ═══
+Der saarländische Bildungsserver blockiert automatische Abrufe. Jede Onlinesuche nach dem
+Lehrplan führt ins Leere oder zu falschen Quellen. Die Angaben oben (Themenfeld, Inhalte,
+Kompetenzbereiche, Stundenrichtwerte) stammen wortgleich aus den Original-PDFs.
+Brauchst du mehr – etwa die wörtlichen Kompetenzerwartungen –, dann sage mir in EINEM Satz,
+welches PDF du brauchst. Ich lade es in diesem Chat hoch. Ich habe alle vorliegen:
+  · Kernlehrplan Deutsch, GemS, Kl. 5–10 (Juli 2012)
+  · GW Verbundfach, GemS, Kl. 5/6 (Erprobungsphase 2014)
+  · GW Verbundfach, GemS, Kl. 7/8 (Fassung 2021)
+  · GW Verbundfach, GemS, Kl. 9/10 (Fassung 2022)
+  · Mathematik, GemS, Kl. 5/6 (Fassung 2025)
+  · Mathematik, GemS – Allgemeine mathematische Kompetenzen (Juli 2018)
+  · Katholische Religion, GemS, Kl. 5–10 (Fassung 2025)
+Erfinde keine Lehrplanformulierungen und weiche nicht auf Ersatzquellen aus.
+
+═══ ${(m.plural||"STATIONEN").toUpperCase()} (laufen parallel) ═══
+  Nr | Name                     |   Zeit | Verbindlich | Phase          | AEIOU | Methode
+${stationen}
+
+═══ STUNDENVERLAUF ═══
+${stunden}
+
+═══ AUFTRAG ═══
+1. Übernimm Stationen, Zeitrichtwerte, Verbindlichkeiten und den Stundenverlauf. Schärfe die
+   Inhalte fachlich, tausche nur, wenn es zwingend ist – dann kurz begründen.
+2. Arbeite jede Station aus, immer in dieser Reihenfolge und nicht länger:
+   a) Leitfrage der Station – ein Satz.
+   b) Material mit Fundstelle – wörtlich aus der Zuordnungstabelle oben.
+   c) Input – höchstens fünf Sätze oder ein Kasten mit den nötigen Begriffen.
+   d) Basisaufgabe, Blütenaufgabe und Digitalaufgabe – je EIN Auftrag in der Form, die
+      zur Sache passt (→ Aufgabenformen). Der Weg dieser Station steuert die Wahl mit.
+   e) Differenzierung ${m.stufen} – nur die Abweichungen benennen, nicht alles neu schreiben.
+   ${m.aeioumodus === "aus"
+     ? "f) kein AEIOU in dieser Reihe."
+     : m.aeioumodus === "aufteilung"
+     ? "f) der Zugang dieser Station als eigener Arbeitsweg."
+     : `f) alle FÜNF AEIOU-Zugänge, jeder als eigener Arbeitsweg zum selben Lernziel:
+      A Analysieren · E Erforschen und Erkunden · I Imaginieren · O Ordnen · U Urteilen.
+      Je Zugang genügt EIN nummerierter Auftrag mit Teilschritten – kurz, aber vollständig.
+      Fehlt an einer Station auch nur ein Zugang, ist die Ausarbeitung unbrauchbar.`}
+   g) Abgabe und Selbstkontrolle – „Woran merkst du, dass du fertig bist?" – je ein Satz.
+   h) welcher Lernbegleiter wobei hilft – ein Satz.
+2b. Differenzierung läuft bei mir über mehrere Kanäle gleichzeitig – bediene die genannten:
+   ${m.diffform.join(" · ") || "Aufgabenniveau, Tipp-Karten"}
+   Dabei bedeutet: Sozialform frei wählbar = die Kinder entscheiden über Einzel-, Partner- oder
+   Gruppenarbeit. Besprechungstisch = fester Ort für Peer-to-Peer-Beratung ohne Lehrkraft.
+   Beratertisch = fester Ort, an dem ich als Lernbegleitung sitze; nenne pro Station, wofür
+   sich der Gang dorthin lohnt. Medienformat wählbar = derselbe Inhalt als Text, Video,
+   Podcast oder Bild, damit der Zugang nicht an der Lesekompetenz scheitert.
+3. Arbeite jede Stunde aus: Impulstext zum Sprechen (Fokus plus je ein Satz zu den übrigen
+   ${m.plural})${m.experten ? " · Auftrag an die Expertinnen und Experten" : ""} · was in der Arbeitsphase zu beobachten ist ·
+   Reflexionsfrage.
+4. Ergänze eine Übersicht für die Lernenden: ${m.karte} mit allen ${m.plural},
+   Zeitrichtwert und Verbindlichkeit – in ihrer Sprache, ohne Fachbegriffe.
+${zusatz.length ? zusatz.map((s,i)=>`${5+i}. ${s}`).join("\n")+"\n" : ""}
+═══ DIGITALE BAUSTEINE UND SPRITES – Angebot, keine Pflicht ═══
+Ich habe zwei Zusatzdateien: einen Katalog fachneutraler Aufgabenformen für digitale
+Stationen (aufgabenbausteine.md) und Sprite-Pakete für die Optik (sprite-pakete.js).
+Beide sind ein ANGEBOT. Prüfe je Station selbst, ob ein digitales Element die Sache
+wirklich trägt – wenn nicht, lass es weg. Ein Lückentext, nur weil es ihn im Katalog gibt,
+hilft niemandem. Die Zahlen im Katalog sind Beispiele, keine Auswahlliste.
+Regel bei der Prüfung: erst die Kompetenz bestimmen, dann die Mechanik – nie umgekehrt.
+Brauchst du eine der Dateien, sag es in einem Satz; ich lade sie hoch.
+
+═══ KOMPAKT BLEIBEN – das ist mir am wichtigsten ═══
+Die letzten Ausarbeitungen haben mich erschlagen. Halte dich an diese Grenzen, auch wenn
+dir dabei etwas Schönes verloren geht. Weniger, das ich benutze, schlägt mehr, das liegen bleibt.
+• Die ERSTE Bildschirmseite ist der ganze Plan: Kopfzeile, sechs Zeilen Rahmendaten,
+  die ${m.plural} als Kacheln nebeneinander, darunter der Stundenverlauf als kompakte Tabelle.
+  Mehr nicht. Diese Seite muss ohne Scrollen erfassbar sein.
+• ALLES Weitere steckt in zugeklappten <details>-Karten: je eine pro Station, je eine
+  pro Stunde, dazu Sachanalyse, didaktische Begründung und Erwartungshorizont.
+
+Harte Obergrenzen – überschreite sie nicht:
+• Stationskarte:      höchstens 300 Wörter${m.aeioumodus === "wahl" ? " zuzüglich der fünf Zugangsaufträge" : ""}.
+• Ein Arbeitsauftrag: höchstens 60 Wörter, drei bis fünf Teilschritte.
+• Impuls je Stunde:   höchstens 120 Wörter Sprechtext.
+• Sachanalyse:        höchstens 150 Wörter, ein Absatz.
+• Didaktische Begründung: höchstens 120 Wörter, ein Absatz.
+• Erwartungshorizont: Stichpunkte, keine Fließtexte, höchstens acht Zeilen je Station.
+• Keine Wiederholungen zwischen Übersicht und Detailkarten. Keine Einleitungen, keine
+  Zusammenfassungen am Ende einer Karte, keine Motivationstexte an mich.
+• Kein Abschnitt, den ich nicht am Montag im Unterricht brauche.
+• Im Druck sind alle Karten geöffnet.
+
+═══ VERBINDLICHE VORGABEN ═══
+• Stundenlänge ${m.dauer} Minuten, Rhythmus ${m.impulsmin}/${m.arbeitsmin}/${m.reflexmin}.
+• Themen werden NICHT an einzelne Stunden gebunden – sie stehen parallel zur Verfügung.
+• AEIOU ist ausschließlich Lehrkraft-intern – die Buchstaben tauchen im Schülermaterial nie auf;
+  dort stehen einladende Wegnamen wie Genau hinsehen, Selbst herausfinden, Etwas erfinden,
+  Ordnung schaffen, Selbst entscheiden.
+• Operatoren dagegen stehen im Klartext in der Aufgabe – sie SIND die Operationalisierung.
+  Erscheint ein Operator in dieser Reihe zum ersten Mal, erklärt ihn ein kleiner Kasten
+  in einem Satz (Beispiel: Vergleichen heißt: Zeige, was gleich ist und was verschieden ist.).
+  Anforderungsbereiche und Kürzel wie AFB II bleiben unsichtbar.
+• Jede Aufgabenstellung beginnt mit einem Operator aus der Liste oben – ohne Ausnahme.
+• Aufgabenform passend zur Sache wählen, nicht dieselbe zweimal hintereinander.
+• Sprachgrenzen der Klassenstufe einhalten; kein Wort von der Sperrliste.
+• Die Mischung aus analog, digital und handelnd gilt für die Reihe, nicht für jede Station.
+• Schüleraufgaben lebensweltlich und operationalisiert, ohne Fachjargon, ohne „Vertiefung".
+• Alle Aufgaben ohne Vorwissen lösbar – nötige Grundlagen stehen im Material der Reihe.
+• Es muss jederzeit klar sein: woran wird gearbeitet, wie lange, woran ist Fertigsein erkennbar.
+• Schülerdaten laufen ausschließlich über OSS / Moodle. Keine externen Dienste.
+• Sprachniveau: ${m.daz === "viele" ? "A2 konsequent" : m.daz === "einige" ? "A2 bis B1" : "B1 bis B2"}.
+• Jede Station nennt ihre Fundstelle wörtlich. Eigene Vorschläge als VORSCHLAG kennzeichnen.
+• Cloud-Links nicht als gelesen behandeln; fehlende Dateien bei mir anfordern, statt zu raten.
+
+═══ AUSGABEFORMAT ═══
+Eine einzelne HTML-Datei, alles inline, Druckbutton oben rechts, A4 quer.
+Farbklima (freundlich, nach meiner HTML-Bibliothek): Seitenhintergrund als weicher Verlauf von
+#A8CBF0 über #C3BEEE nach #D6ACE0, Karten in halbtransparentem Weiß mit 18px Radius,
+Überschriften in Serifenschrift und Tintenblau #2C3E63, Fließtext #44557E,
+Leitfarbe Himmelblau #5B96E3, Sicherung Mint #5FBFA0, Meilenstein Gold #E9B44C.
+Gib am Ende die Übersicht als JSON-Block aus:
+{"meta":{…},"stationen":[{nr,name,thema,phase,minuten,verbind,aeiou,weg,methode,sozial,material,fundstelle,abgabe}],
+ "stunden":[{nr,datum,art,fokus,impuls,experten,arbeit,reflexion}]}
+phase: orientieren|erarbeiten1|erarbeiten2|ueben|transfer|bilanz · art: auftakt|impuls|bilanz|abschluss|ln`;
+}
+
+/* =========================================================
+   SPEICHERN / LADEN
+   ========================================================= */
+function dateiname(){
+  const m = ZUSTAND.meta;
+  const t = (m.thema||"reihe").toLowerCase().replace(/[^a-z0-9äöüß]+/g,"-").replace(/^-|-$/g,"").slice(0,40);
+  return `reihenplanung_${t}_kl${m.klasse||"x"}.json`;
+}
+function sichern(){
+  if(!ZUSTAND.stationen.length){ alert("Zuerst einen Reihenplan erzeugen."); return; }
+  const blob = new Blob([JSON.stringify(ZUSTAND,null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = dateiname(); a.click();
+  URL.revokeObjectURL(a.href);
+  merkeInArchiv(dateiname());
+}
+function merkeInArchiv(name){
+  ARCHIV.unshift({name, meta:{...ZUSTAND.meta},
+    stationen:JSON.parse(JSON.stringify(ZUSTAND.stationen)),
+    stunden:JSON.parse(JSON.stringify(ZUSTAND.stunden))});
+  zeichneArchiv();
+}
+function zeichneArchiv(){
+  const l = $("#archivliste");
+  if(!ARCHIV.length){ l.innerHTML = `<div class="mini">Noch keine Reihe gesichert.</div>`; return; }
+  l.innerHTML = ARCHIV.map((a,i) => `
+    <div class="eintrag">
+      <div><b><span class="fachpunkt" style="background:${a.meta.farbe||"#5B96E3"}"></span>${a.meta.thema||"ohne Titel"}</b>
+        <div><small>${a.meta.fachname} · Klasse ${a.meta.klasse} · ${a.meta.formatname||""} · ${a.stationen.length} Stationen, ${a.stunden.length} Stunden</small></div>
+      </div>
+      <button class="knopf zweit klein" data-laden="${i}">öffnen</button>
+    </div>`).join("");
+  l.querySelectorAll("[data-laden]").forEach(b => b.addEventListener("click", () => {
+    const a = ARCHIV[+b.dataset.laden];
+    ZUSTAND = {meta:{...a.meta}, stationen:JSON.parse(JSON.stringify(a.stationen)),
+               stunden:JSON.parse(JSON.stringify(a.stunden))};
+    if(a.meta.bots){ BOTS = JSON.parse(JSON.stringify(a.meta.bots)); zeichneBots(); }
+    if(a.meta.quellen){ QUELLEN = JSON.parse(JSON.stringify(a.meta.quellen)); zeichneQuellen(); }
+    zeichneAlles(); $("#promptbox").textContent = baueAuftrag(); tabWechsel("p-plan");
+  }));
+}
+function importieren(datei){
+  const leser = new FileReader();
+  leser.onload = e => {
+    try{
+      const d = JSON.parse(e.target.result);
+      if(!d.stationen || !d.stunden) throw new Error("Kein gültiges Reihenformat.");
+      d.stationen.forEach((s,i) => { s.nr = i+1; s.minuten = s.minuten ?? 0; s.verbind = s.verbind || "Pflicht"; });
+      d.stunden.forEach((s,i) => { s.nr = i+1; s.art = s.art || "impuls"; });
+      ZUSTAND = {meta: d.meta || ZUSTAND.meta, stationen:d.stationen, stunden:d.stunden};
+      if(d.meta && d.meta.bots){ BOTS = d.meta.bots; zeichneBots(); }
+      if(d.meta && d.meta.quellen){ QUELLEN = d.meta.quellen; zeichneQuellen(); }
+      zeichneAlles(); $("#promptbox").textContent = baueAuftrag();
+      merkeInArchiv(datei.name); tabWechsel("p-plan");
+    }catch(err){ alert("Datei konnte nicht gelesen werden: " + err.message); }
+  };
+  leser.readAsText(datei);
+}
+
+/* =========================================================
+   OBERFLÄCHE
+   ========================================================= */
+function tabWechsel(ziel){
+  $$("nav.tabs button").forEach(b => b.classList.toggle("aktiv", b.dataset.ziel === ziel));
+  $$(".panel").forEach(p => p.classList.toggle("aktiv", p.id === ziel));
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function bindeChips(auswahl){
+  $$(auswahl + " .chip").forEach(c => {
+    if(c.dataset.gebunden) return;
+    c.dataset.gebunden = "1";
+    c.addEventListener("click", () => { c.classList.toggle("an"); rechneVorschau(); });
+  });
+}
+function fuelleFach(){
+  const f = $("#fach").value, F = FAECHER[f], altKlasse = $("#klasse").value;
+  $("#klasse").innerHTML = F.klassen.map(k => `<option>${k}</option>`).join("");
+  if(F.klassen.includes(parseInt(altKlasse,10))) $("#klasse").value = altKlasse;
+  $("#schwerpunkt").innerHTML = F.schwerpunkte.map(s => `<option value="${s.w}">${s.t}</option>`).join("");
+  $("#feld-schwerpunkt").style.display = F.schwerpunkte.length > 1 ? "" : "none";
+  document.documentElement.style.setProperty("--fach", F.farbe);
+  fuelleLehrplan();
+}
+function fuelleLehrplan(){
+  const f = $("#fach").value, k = $("#klasse").value;
+  const felder = (LEHRPLAN[f] && LEHRPLAN[f][k]) || [];
+  $("#themenfeld").closest(".feld").querySelector("label").innerHTML =
+    (f === "gw" || f === "mathematik") ? "Themenfeld laut Lehrplan"
+    : f === "reli" ? 'Lernbereich laut Lehrplan <span class="opt">– der Lernbereich ist der Rahmen, nicht das Thema</span>'
+    : f === "deutsch" ? 'Unterrichtseinheit <span class="opt">– schulinterner Arbeitsplan, keine Lehrplanvorgabe</span>'
+    : 'Unterrichtseinheit <span class="opt">– frei eintragen</span>';
+  $("#themenfeld").innerHTML = `<option value="">— nichts gewählt —</option>` +
+    felder.map(t => `<option>${t}</option>`).join("") +
+    `<option value="__frei">… eigenes Thema eintragen</option>`;
+  $("#kompetenzen").innerHTML = KOMPETENZEN[f].map(g =>
+    (g.gruppe ? `<div class="chipgruppe">${g.gruppe}</div>` : "") +
+    g.eintraege.map(e => `<div class="chip" data-w="${e}">${e}</div>`).join("")).join("");
+  bindeChips("#kompetenzen");
+  const lp = LEITPERSPEKTIVEN[f] || LEITPERSPEKTIVEN.standard;
+  $("#leitperspektiven").innerHTML = lp.map(e => `<div class="chip" data-w="${e}">${e}</div>`).join("");
+  bindeChips("#leitperspektiven");
+  const alt = $("#niveau").value, opt = niveauOptionen(f, k);
+  $("#niveau").innerHTML = opt.map(o => `<option>${o}</option>`).join("");
+  if(opt.includes(alt)) $("#niveau").value = alt;
+  $("#lehrplanquelle").textContent = "Grundlage: " + LEHRPLANQUELLE[f];
+  zeigeInhalte();
+}
+function zeigeInhalte(){
+  const wahl = $("#themenfeld").value;
+  const nr = (wahl.match(/^(\d+\.\d)/) || [])[1];
+  const inhalte = (nr && GW_INHALTE[nr]) || MATHE_INHALTE[wahl] || RELI_INHALTE[wahl];
+  $("#feld-inhalte").style.display = inhalte ? "" : "none";
+  if(inhalte) $("#gwinhalte").innerHTML =
+    `<div class="warnung gruen" style="margin-top:0">${inhalte.map(i=>"· "+i).join("<br>")}</div>`;
+}
+function zeichneBots(){
+  const l = $("#botliste");
+  if(!BOTS.length){ l.innerHTML = `<div class="mini">Kein Lernbegleiter – so ist es voreingestellt. Die Differenzierung läuft dann über Tipp-Karten, Aufgabenstufen, Besprechungs- und Beratertisch. Wer einen Chatbot einsetzen will, trägt ihn oben ein.</div>`; return; }
+  l.innerHTML = BOTS.map((b,i) => `
+    <div class="eintrag"><div><b>${b.name}</b>
+      <div><small>${b.rolle || "Zuständigkeit nicht festgelegt"}${b.link ? " · "+b.link : ""}</small></div></div>
+      <button class="weg" data-weg="${i}">×</button></div>`).join("");
+  l.querySelectorAll("[data-weg]").forEach(b => b.addEventListener("click", () => {
+    BOTS.splice(+b.dataset.weg,1); zeichneBots();
+  }));
+}
+function zeichneQuellen(){
+  const l = $("#mqliste");
+  if(!QUELLEN.length){ l.innerHTML = `<div class="mini">Noch keine Materialquelle hinterlegt. Ohne Eintrag schlägt Claude eigenes Material vor.</div>`; return; }
+  l.innerHTML = QUELLEN.map((q,i) => `
+    <div class="eintrag"><div><b>${q.titel}</b>
+      <div><small>${q.art ? q.art+" · " : ""}${q.fund ? "<b>"+q.fund+"</b>" : "<i>ohne Fundstelle – fließt nur als Hinweis ein</i>"}${q.zu ? " · gehört zu: "+q.zu : ""}${q.datei ? " · Datei: "+q.datei+(q.groesse?" ("+q.groesse+")":"") : ""}${q.link ? " · Link hinterlegt (für Claude nicht abrufbar)" : ""}</small></div></div>
+      <button class="weg" data-weg="${i}">×</button></div>`).join("");
+  l.querySelectorAll("[data-weg]").forEach(b => b.addEventListener("click", () => {
+    QUELLEN.splice(+b.dataset.weg,1); zeichneQuellen();
+  }));
+}
+/* Ereignisse */
+$$("nav.tabs button").forEach(b => b.addEventListener("click", () => tabWechsel(b.dataset.ziel)));
+bindeChips("#diffform"); bindeChips("#medien");
+bindeChips("#rahmennamen"); bindeChips("#lnformate"); bindeChips("#klnformate");
+$("#fach").addEventListener("change", () => { fuelleFach(); rechneVorschau(); });
+$("#format").addEventListener("change", () => {
+  if($("#format").value === "lerndorf") $("#aeioumodus").value = "aufteilung";
+  rechneVorschau();
+});
+$("#klasse").addEventListener("change", () => { fuelleLehrplan(); rechneVorschau(); });
+["stunden","lnart","lnvorb","lnrueck","lnzeitpunkt","lnwahl","klnanzahl",
+ "hand","hetero","lesen","daz","niveau","format","reihenfolge","anzahl",
+ "bilanzdichte","wahlanteil","bonus","experten","schwerpunkt","aeioumodus"]
+ .forEach(id => { const e = $("#"+id); if(e) e.addEventListener("change", rechneVorschau); });
+
+$("#btn-lnformat").addEventListener("click", () => {
+  const eigen = prompt("Eigenes Format eintragen:");
+  if(!eigen) return;
+  const d = document.createElement("div");
+  d.className = "chip an"; d.dataset.w = eigen.trim(); d.textContent = eigen.trim();
+  $("#lnformate").appendChild(d); bindeChips("#lnformate"); rechneVorschau();
+});
+$("#stunden").addEventListener("input", rechneVorschau);
+$("#themenfeld").addEventListener("change", e => {
+  if(e.target.value === "__frei"){
+    const eigen = prompt("Thema eintragen:");
+    if(eigen){ const o = document.createElement("option"); o.textContent = eigen; o.selected = true;
+      e.target.insertBefore(o, e.target.lastElementChild); }
+    else e.target.selectedIndex = 0;
+  }
+  zeigeInhalte();
+});
+
+$("#btn-bot").addEventListener("click", () => {
+  const name = $("#bot-name").value.trim();
+  if(!name){ alert("Bitte einen Namen eintragen."); return; }
+  BOTS.push({name, rolle:$("#bot-rolle").value.trim(), link:$("#bot-link").value.trim()});
+  $("#bot-name").value = ""; $("#bot-rolle").value = ""; $("#bot-link").value = "";
+  zeichneBots();
+});
+$("#btn-mq").addEventListener("click", () => {
+  const titel = $("#mq-titel").value.trim();
+  if(!titel){ alert("Bitte eine Bezeichnung eintragen."); return; }
+  QUELLEN.push({titel, art:$("#mq-art").value, link:$("#mq-link").value.trim(), zu:$("#mq-zu").value.trim(), fund:$("#mq-fund").value.trim()});
+  $("#mq-titel").value = ""; $("#mq-link").value = ""; $("#mq-zu").value = ""; $("#mq-fund").value = "";
+  zeichneQuellen();
+});
+$("#btn-mqdatei").addEventListener("click", () => $("#mqdatei").click());
+$("#mqdatei").addEventListener("change", e => {
+  Array.from(e.target.files).forEach(f => {
+    const kb = f.size > 1048576 ? (f.size/1048576).toFixed(1)+" MB" : Math.round(f.size/1024)+" KB";
+    QUELLEN.push({titel:f.name.replace(/\.[^.]+$/,""), art:$("#mq-art").value, datei:f.name, groesse:kb, zu:$("#mq-zu").value.trim(), fund:$("#mq-fund").value.trim()});
+  });
+  $("#mq-zu").value = ""; $("#mq-fund").value = ""; e.target.value = ""; zeichneQuellen();
+});
+
+$("#btn-generieren").addEventListener("click", () => {
+  if(!$("#thema").value.trim()){ alert("Bitte zuerst ein Thema eintragen."); $("#thema").focus(); return; }
+  if(!$("#reihenfolge").value){
+    if(!confirm('Die Reihenfolge der Stationen ist noch nicht festgelegt.\nOhne Auswahl arbeite ich mit „frei – alle Stationen offen“. Fortfahren?')) {
+      tabWechsel("p-eingabe"); $("#reihenfolge").focus(); return;
+    }
+  }
+  bauePlan(); zeichneAlles(); $("#promptbox").textContent = baueAuftrag(); tabWechsel("p-plan");
+});
+$("#btn-neu").addEventListener("click", () => {
+  if(!confirm("Der Plan wird neu berechnet. Eigene Eintragungen gehen verloren. Fortfahren?")) return;
+  bauePlan(); zeichneAlles(); $("#promptbox").textContent = baueAuftrag();
+});
+$("#btn-station").addEventListener("click", () => {
+  ZUSTAND.stationen.push({nr:ZUSTAND.stationen.length+1, phase:"ueben", name:"Neue Station",
+    thema:"", minuten:40, verbind:"Wahl", zugaenge: zugaengeFuer(), weg:"handelnd",
+    methode:"", sozial:"EA", material:"", fundstelle:"", abgabe:""});
+  zeichneKacheln(); zeichneAuslastung(); zeichnePruefblick();
+});
+$("#btn-stunde").addEventListener("click", () => {
+  ZUSTAND.stunden.push({nr:ZUSTAND.stunden.length+1, datum:"", art:"impuls", fokus:"",
+    impuls:"", experten:"", arbeit:"Alle Stationen offen", reflexion:""});
+  zeichneRaster();
+});
+$("#btn-drucken").addEventListener("click", () => {
+  $("#p-plan").classList.add("druckbar"); window.print();
+  setTimeout(()=>$("#p-plan").classList.remove("druckbar"), 800);
+});
+$("#btn-zu-claude").addEventListener("click", () => { $("#promptbox").textContent = baueAuftrag(); tabWechsel("p-claude"); });
+$("#btn-prompt-neu").addEventListener("click", () => { $("#promptbox").textContent = baueAuftrag(); });
+$("#btn-kopieren").addEventListener("click", async () => {
+  try{ await navigator.clipboard.writeText($("#promptbox").textContent);
+    $("#btn-kopieren").textContent = "Kopiert ✓";
+    setTimeout(()=>$("#btn-kopieren").textContent="Auftrag kopieren",1800); }
+  catch(e){ const r = document.createRange(); r.selectNode($("#promptbox"));
+    getSelection().removeAllRanges(); getSelection().addRange(r);
+    alert("Bitte mit Strg+C kopieren – der Text ist markiert."); }
+});
+$("#btn-speichern").addEventListener("click", sichern);
+$("#btn-importieren").addEventListener("click", () => $("#datei").click());
+$("#datei").addEventListener("change", e => { if(e.target.files[0]) importieren(e.target.files[0]); });
+
+$("#btn-beispiel").addEventListener("click", () => {
+  $("#fach").value = "gw"; fuelleFach();
+  $("#schwerpunkt").value = "integriert"; $("#klasse").value = "6"; fuelleLehrplan();
+  $("#lerngruppe").value = "6a";
+  $("#thema").value = "Die Antike – Wurzel unserer Kultur";
+  $("#leitfrage").value = "Was von den alten Griechen und Römern steckt heute noch in deinem Alltag?";
+  $("#lernziel").value = "Die Schülerinnen und Schüler können Errungenschaften der Antike beschreiben, ihre Spuren in der Gegenwart erkennen und begründet beurteilen, was davon bis heute wirkt.";
+  $("#stunden").value = 18; $("#format").value = "lerndorf"; $("#reihenfolge").value = "basis";
+  $("#reihenfolge").classList.remove("offen");
+  $("#themenfeld").value = "6.3 Die Antike – Wurzel unserer Kultur (18 Std)";
+  $("#rahmenfigur").value = "Herakles";
+  $("#rahmenhandlung").value = "Herakles reist durch Griechenland und braucht bei jeder Aufgabe Hilfe von der Klasse";
+  $("#lehrwerk").value = "Heimat und Welt GW 5/6, Westermann";
+  $("#aeioumodus").value = "aufteilung";
+  $("#lnart").value = "alternativ"; $("#lnzeitpunkt").value = "frei"; $("#lnwahl").value = "ja";
+  $("#klnanzahl").value = "2"; $("#hand").value = "ja";
+  $("#handwas").value = "Modell eines griechischen Tempels oder einer römischen Straße bauen";
+  $("#raster3").value = "Ich kann erklären, was die Menschen in der Antike erfunden haben.\nIch kann Spuren der Antike in meiner Umgebung finden.\nIch kann begründen, was davon heute noch wichtig ist.";
+  $$("#lnformate .chip").forEach(c => c.classList.toggle("an",
+    ["Podcast","Erklärvideo","Modell / Objekt","Ausstellung","Präsentation"].includes(c.dataset.w)));
+  $$("#kompetenzen .chip").forEach(c => c.classList.toggle("an",
+    ["SK – Sachkompetenz","OK – Orientierungskompetenz","BK – Beurteilungskompetenz"].includes(c.dataset.w)));
+  $$("#leitperspektiven .chip").forEach(c => c.classList.toggle("an",
+    c.dataset.w === "Individuum und Gesellschaft"));
+  $$("#medien .chip").forEach(c => c.classList.toggle("an", ["Smartboard","OSS/Moodle","Lernwelt"].includes(c.dataset.w)));
+
+  zeigeInhalte(); rechneVorschau();
+});
+$("#btn-leeren").addEventListener("click", () => { if(confirm("Alle Eingaben zurücksetzen?")) location.reload(); });
+$("#reihenfolge").addEventListener("change", e => e.target.classList.toggle("offen", !e.target.value));
+
+/* Start */
+(function start(){
+  fuelleFach(); zeichneBots(); zeichneQuellen();
+  rechneVorschau(); zeichneArchiv();
+})();
+</script>
+</body>
+</html>
